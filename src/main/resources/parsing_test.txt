@@ -1,0 +1,52 @@
+initOpenCL(device="GPU", deviceName="RTX 4080")
+inputBuffer = clBuffer("RW", particleArray, size=1234)
+queueWriteBuffer(particleArray)
+
+class ParticleData {
+    pressure
+    density
+}
+
+__constant PI = 3.14159 // this is pi
+
+calculateDensity(inputData, size) {
+
+    if (5 < var)
+    {
+        if (c++)
+        {
+            print("bulbasaur")
+        }
+    }
+    else if (4 > 2) {
+        print("yadon")
+    } else {
+        print("pikachu")
+    }
+
+    for (i = 0; i < 10; i++)
+    {
+
+    }
+
+    while (true) {}
+
+    inputData++
+    ++inputData
+    p = ParticleData(3, density = 4)
+    inputData = inputData * size
+}
+
+/*
+    calculates pressure and viscosity force
+*/
+calculatePressureAndViscosityForce(inputData, size) {
+    inputData += size
+}
+
+__kernel doSomething(__global param1, __local param2, param3) {
+    synchronized(
+        calculateDensity(inputData, size = 5),
+        calculatePressureAndViscosityForce(inputData, size)
+        )
+}
