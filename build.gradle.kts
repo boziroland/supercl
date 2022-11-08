@@ -16,6 +16,7 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     antlr("org.antlr:antlr4:4.10.1")
+    implementation("org.apache.commons:commons-lang3:3.6")
 }
 
 tasks.test {
