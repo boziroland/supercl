@@ -28,7 +28,9 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
         currentScope = Scope(parent = currentScope, name = name!!)
         vars!!.forEach { e -> currentScope[name] = Symbol(e.text, TSType(name)) }
 
-        super.visitClass(ctx)
+        super.visitClass(ctx).also {
+            currentScope = currentScope.parent!!
+        }
     }
 
     override fun visitParameter(ctx: kernelParser.ParameterContext?) {
@@ -59,7 +61,9 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
             }
         }
 
-        return super.visitMethod(ctx)
+        return super.visitMethod(ctx).also {
+            currentScope = currentScope.parent!!
+        }
     }
 
     override fun visitAssignment(ctx: kernelParser.AssignmentContext?) {
@@ -90,7 +94,9 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
         currentScope = Scope(parent = currentScope, name = "for_loop")
         currentScope[loopVar!!] = Symbol(loopVar, TSType(loopVarType))
 
-        return super.visitFor(ctx)
+        return super.visitFor(ctx).also {
+            currentScope = currentScope.parent!!
+        }
     }
 
     override fun visitBlock(ctx: kernelParser.BlockContext?) {
@@ -98,7 +104,9 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
 
         currentScope = Scope(parent = currentScope, name = "block")
 
-        super.visitBlock(ctx)
+        super.visitBlock(ctx).also {
+            currentScope = currentScope.parent!!
+        }
     }
 
     override fun visitDeclaration(ctx: kernelParser.DeclarationContext?) {
@@ -110,7 +118,6 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
         if (ctx?.WORD()?.size == 1 && isBuiltInType)
         {
             if (!isCorrectType(TSType(type!!), getType(rhs!!)))
-            //if (!isCorrectType(TSType(type!!), ctx?.(0)?.text!!))
             {
                 throw RuntimeException("Variable on right side of assignment" +
                         " to ${varName} is of incorrect type! (variable ${varName})")
@@ -157,9 +164,14 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
 
     override fun visitMethodCall(ctx: kernelParser.MethodCallContext?) {
         val methodName = ctx?.text!!
-        val params = ctx?.WORD()?.subList(1, ctx.WORD()!!.size)
+        val params = ctx?.WORD()?.subList(1, ctx.WORD()!!.size)!!
 
-        //if (!globalScope.keys.contains(methodName) || !currentScope.keys.contains(methodName)) {
+        params.forEach {
+            if (!isInScope(it.text)) {
+                throw RuntimeException("Variable ${it} not in scope when calling method ${methodName}!")
+            }
+        }
+
         if (isInScope(methodName)) {
             throw RuntimeException("No such method defined!")
         }

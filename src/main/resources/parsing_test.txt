@@ -41,6 +41,12 @@ int calculateDensity(int inputData, float size) {
     ParticleData p = ParticleData(3, 4)
     int data2 = 5
     inputData = inputData * data2
+
+    if (data2 == 5){
+        print(p)
+        int data3 = 5
+    }
+    print(data3)
 }
 
 /*
