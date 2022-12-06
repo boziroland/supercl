@@ -1,13 +1,10 @@
 package symboltable
 
+import typesystem.TSType
+
 open class Symbol(
     val name: String,
-    val type: String
+    val type: TSType
 ) {
-
-    constructor(
-        name: String
-    ) : this(name = name, type = "var")
-
     override fun toString() = "$name: $type"
 }

@@ -13,27 +13,27 @@ statementList
     ;
 
 statement
-    : for | while | if | methodHeader | method | assignment | methodCall | singleLineComment | multiLineComment | class | prefixOperator | postfixOperator | if
-    ;
-
-class
-    : CLASS WORD BLOCKBEGIN WORD+ BLOCKEND
-    ;
-
-parameter
-    :   MEMORY_QUALIFIER? WORD
-    ;
-
-methodHeader
-    : (KERNEL | DEF) WORD LPARENT parameter (COMMA parameter)* RPARENT
-    ;
-
-method
-    : methodHeader BLOCKBEGIN block BLOCKEND
+    : if | for | while | methodHeader | method | declaration | methodCall | singleLineComment | multiLineComment | class | prefixOperator | postfixOperator | assignment
     ;
 
 for
-    : FOR LPARENT assignment COLON expression COLON expression RPARENT block
+    : FOR LPARENT declaration SEMI expression SEMI expression RPARENT block
+    ;
+
+class
+    : CLASS WORD BLOCKBEGIN (TYPE WORD)+ BLOCKEND
+    ;
+
+parameter
+    :   MEMORY_QUALIFIER? TYPE WORD
+    ;
+
+methodHeader
+    : (KERNEL | TYPE) WORD LPARENT parameter (COMMA parameter)* RPARENT
+    ;
+
+method
+    : methodHeader block
     ;
 
 while
@@ -45,7 +45,7 @@ if
     ;
 
 block
-    : BLOCKBEGIN (if | assignment | prefixOperator | postfixOperator | methodCall | singleLineComment | multiLineComment)* BLOCKEND
+    : BLOCKBEGIN (statement)* BLOCKEND
     ;
 
 singleLineComment
@@ -57,11 +57,15 @@ multiLineComment
     ;
 
 methodCall
-    : WORD LPARENT (assignment | WORD | REALNUMBER | STRING) (',' (assignment | WORD | REALNUMBER | STRING))* RPARENT
+    : WORD LPARENT (WORD | REALNUMBER | STRING | methodCall) (',' (WORD | REALNUMBER | STRING | methodCall))* RPARENT
+    ;
+
+declaration
+    : MEMORY_QUALIFIER? (TYPE | WORD) WORD ASSIGN (WORD | REALNUMBER | methodCall | STRING | expression)
     ;
 
 assignment
-    : MEMORY_QUALIFIER? WORD ASSIGN (WORD | REALNUMBER | methodCall | STRING | expression)
+    : WORD (ASSIGN | specialAssign) (WORD | REALNUMBER | methodCall | STRING | expression)
     ;
 
 expression
@@ -80,8 +84,12 @@ binaryOperator
     : (WORD | REALNUMBER | methodCall | STRING) (PLUS | MINUS | STAR | MOD | DIV | EQUAL | NOTEQUAL | LESS | LESSEQUAL | GREATER | GREATEREQUAL) (WORD | REALNUMBER | methodCall | STRING)
     ;
 
-WORD
-    : LETTER (LETTER | REALNUMBER)*
+specialAssign
+    : STARASSIGN | DIVASSIGN | MODASSIGN | PLUSASSIGN | MINUSASSIGN | ANDASSIGN | XORASSIGN | ORASSIGN
+    ;
+
+TYPE
+    : 'float' | 'string' | 'bool' | 'int' | 'void'
     ;
 
 REALNUMBER
@@ -206,6 +214,10 @@ DEF
 
 WS	: 	(' '| '\t' | '\n' | '\r') -> skip
 	;
+
+WORD
+    : LETTER (LETTER | REALNUMBER)*
+    ;
 
 fragment LETTER
     : [a-zA-Z]

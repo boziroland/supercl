@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.10"
+    kotlin("jvm") version "1.7.21"
     application
     antlr
 }
@@ -17,14 +17,26 @@ dependencies {
     testImplementation(kotlin("test"))
     antlr("org.antlr:antlr4:4.10.1")
     implementation("org.apache.commons:commons-lang3:3.6")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 
+val packageName = "kernel.antlr"
+tasks.generateGrammarSource {
+    outputDirectory = File("C:\\Users\\Roland\\Documents\\OpenCLPP2\\src\\main\\java\\kernel\\antlr") // TODO
+    arguments = listOf(
+        "-visitor",
+        "-package", packageName,
+    )
+}
+
+tasks.getByName("compileKotlin").dependsOn("generateGrammarSource")
+
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 buildscript {
@@ -35,4 +47,12 @@ buildscript {
 
 application {
     mainClass.set("MainKt")
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    jvmTarget = "1.8"
+}
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+    jvmTarget = "1.8"
 }

@@ -1,5 +1,5 @@
-// Generated from C:/Users/Roland/Documents/OpenCLPP2/src/main/antlr\kernel.g4 by ANTLR 4.10.1
-package kernel;
+// Generated from kernel.g4 by ANTLR 4.10.1
+package kernel.antlr;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -52,6 +52,18 @@ public class kernelBaseListener implements kernelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterFor(kernelParser.ForContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFor(kernelParser.ForContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterClass(kernelParser.ClassContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -95,18 +107,6 @@ public class kernelBaseListener implements kernelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitMethod(kernelParser.MethodContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterFor(kernelParser.ForContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFor(kernelParser.ForContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -184,6 +184,18 @@ public class kernelBaseListener implements kernelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterDeclaration(kernelParser.DeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDeclaration(kernelParser.DeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAssignment(kernelParser.AssignmentContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -239,6 +251,18 @@ public class kernelBaseListener implements kernelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitBinaryOperator(kernelParser.BinaryOperatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSpecialAssign(kernelParser.SpecialAssignContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSpecialAssign(kernelParser.SpecialAssignContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

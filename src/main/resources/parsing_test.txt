@@ -1,15 +1,17 @@
-initOpenCL(device="GPU", deviceName="RTX 4080")
-inputBuffer = clBuffer("RW", particleArray, size=1234)
-queueWriteBuffer(particleArray)
-
 class ParticleData {
-    pressure
-    density
+    int pressure
+    float density
 }
 
-__constant PI = 3.14159 // this is pi
+void print(string str) {
 
-calculateDensity(inputData, size) {
+}
+
+float PI = 3.14159 // this is pi
+
+int calculateDensity(int inputData, float size) {
+
+    int var = 3
 
     if (5 < var)
     {
@@ -18,13 +20,16 @@ calculateDensity(inputData, size) {
             print("bulbasaur")
         }
     }
-    else if (4 > 2) {
+    else if (4 > 2)
+    {
         print("yadon")
-    } else {
+    }
+    else
+    {
         print("pikachu")
     }
 
-    for (i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++)
     {
 
     }
@@ -33,20 +38,21 @@ calculateDensity(inputData, size) {
 
     inputData++
     ++inputData
-    p = ParticleData(3, density = 4)
-    inputData = inputData * size
+    ParticleData p = ParticleData(3, 4)
+    int data2 = 5
+    inputData = inputData * data2
 }
 
 /*
     calculates pressure and viscosity force
 */
-calculatePressureAndViscosityForce(inputData, size) {
+float calculatePressureAndViscosityForce(int inputData, int size) {
     inputData += size
 }
 
-__kernel doSomething(__global param1, __local param2, param3) {
-    synchronized(
-        calculateDensity(inputData, size = 5),
+__kernel doSomething(__global float param1, __local  int param2, string param3) {
+    calculatePressureAndViscosityForce(
+        calculateDensity(inputData, 5),
         calculatePressureAndViscosityForce(inputData, size)
         )
 }

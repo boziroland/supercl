@@ -1,5 +1,5 @@
-// Generated from C:/Users/Roland/Documents/OpenCLPP2/src/main/antlr\kernel.g4 by ANTLR 4.10.1
-package kernel;
+// Generated from kernel.g4 by ANTLR 4.10.1
+package kernel.antlr;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -29,6 +29,12 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStatement(kernelParser.StatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link kernelParser#for}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFor(kernelParser.ForContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link kernelParser#class}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -52,12 +58,6 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMethod(kernelParser.MethodContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link kernelParser#for}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFor(kernelParser.ForContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link kernelParser#while}.
 	 * @param ctx the parse tree
@@ -95,6 +95,12 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMethodCall(kernelParser.MethodCallContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link kernelParser#declaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeclaration(kernelParser.DeclarationContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link kernelParser#assignment}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -124,4 +130,10 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBinaryOperator(kernelParser.BinaryOperatorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link kernelParser#specialAssign}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSpecialAssign(kernelParser.SpecialAssignContext ctx);
 }
