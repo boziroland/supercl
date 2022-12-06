@@ -8,10 +8,12 @@ import symboltable.MethodSymbol
 import symboltable.Scope
 import symboltable.Symbol
 import typesystem.TSType
+import typesystem.TypeSystem
 
 class GlobalVisitor : kernelBaseVisitor<Any>() {
 
-    private val globalScope = Scope(parent = null, name = "GLOBAL")
+    val globalScope = Scope(parent = null, name = "GLOBAL")
+    val typeSystem = TypeSystem()
 
     override fun visitProgram(ctx: kernelParser.ProgramContext?): Any {
         super.visitProgram(ctx)
@@ -23,10 +25,12 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
         val isBuiltInType = !StringUtils.isBlank(ctx?.TYPE()?.text)
         val type = ctx?.TYPE()?.text ?: ctx?.WORD(0)?.text
         val varName = if (isBuiltInType) ctx?.WORD(0)?.text else ctx?.WORD(1)?.text
+        val tType = TSType(type!!)
+        val rhs : String? = ctx?.WORD(2)?.text?: ctx?.REALNUMBER()?.text ?: ctx?.methodCall()?.text ?: ctx?.STRING()?.text ?: ctx?.expression()?.text ?: ctx?.WORD(1)?.text
 
         if (ctx?.WORD()?.size == 2 && isBuiltInType)
         {
-            if (!isCorrectType(TSType(type!!), ctx?.WORD(1)?.text!!))
+            if (!isCorrectType(tType, ctx?.WORD(1)?.text!!))
             {
                 throw RuntimeException("Variable on right side of assignment" +
                         " to ${varName} is of incorrect type! (type ${getType(varName!!)}")
@@ -35,7 +39,7 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
 
         else if (ctx?.WORD()?.size == 2 && !isBuiltInType)
         {
-            if (!isCorrectType(TSType(type!!), ctx?.methodCall()?.WORD(0)?.text!!))
+            if (!isCorrectType(tType, ctx?.methodCall()?.WORD(0)?.text!!))
             {
                 throw RuntimeException("Variable on right side of assignment" +
                         " to ${varName} is of incorrect type! (type ${getType(varName!!)})")
@@ -44,7 +48,7 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
 
         else if (ctx?.WORD()?.size == 3)
         {
-            if (!isCorrectType(TSType(type!!), ctx?.WORD(2)?.text!!))
+            if (!isCorrectType(tType, ctx?.WORD(2)?.text!!))
             {
                 throw RuntimeException("Variable on right side of assignment" +
                         " to ${varName} is of incorrect type! (type ${getType(varName!!)}")
@@ -58,7 +62,8 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
                 throw RuntimeException("Variable already defined!")
             }
         }
-        globalScope[varName!!] = Symbol(varName, TSType(type!!))
+
+        globalScope[varName!!] = Symbol(varName, tType)
 
         super.visitDeclaration(ctx)
     }
@@ -70,6 +75,7 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
         {
             throw RuntimeException("Class already defined!")
         }
+        typeSystem.addType(TSType(className))
 
         val clazz = ClassSymbol(className)
         val properties = ctx.WORD().subList(1, ctx.WORD().size)
@@ -101,12 +107,9 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
 
         globalScope[name] = method
 
-        super.visitMethod(ctx)
     }
 
-    override fun visitIf(ctx: kernelParser.IfContext?) {
-
-    }
+    override fun visitIf(ctx: kernelParser.IfContext?) {}
 
     fun isCorrectType(lhs: TSType, rhs: String): Boolean {
         return lhs.type == globalScope[rhs]?.type?.type ||
@@ -121,11 +124,11 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
     fun getType(variable: String): TSType? {
 
         if (variable.toIntOrNull() != null) {
-            return TSType("int")
+            return typeSystem.types["int"]
         } else if (variable.toFloatOrNull() != null) {
-            return TSType("float")
+            return typeSystem.types["float"]
         }
 
-        return globalScope[variable]?.type
+        return typeSystem.types[variable]
     }
 }

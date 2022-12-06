@@ -6,11 +6,12 @@ import org.apache.commons.lang3.StringUtils
 import symboltable.Scope
 import symboltable.Symbol
 import typesystem.TSType
+import typesystem.TypeSystem
 
 class DetailedVisitor : kernelBaseVisitor<Any>() {
 
-    lateinit var globalScope: Scope;
-
+    lateinit var globalScope: Scope
+    lateinit var typeSystem: TypeSystem
     lateinit var currentScope: Scope
 
     override fun visitProgram(ctx: kernelParser.ProgramContext?) {
@@ -101,16 +102,18 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
     }
 
     override fun visitDeclaration(ctx: kernelParser.DeclarationContext?) {
-        val isBuiltInType = !StringUtils.isBlank(ctx?.TYPE()?.text)
+        val isBuiltInType = typeSystem.getBuiltInTypes().contains(ctx?.TYPE()?.text)
         val type = ctx?.TYPE()?.text ?: ctx?.WORD(0)?.text
         val varName = if (isBuiltInType) ctx?.WORD(0)?.text else ctx?.WORD(1)?.text
+        val rhs : String? = ctx?.WORD(2)?.text?: ctx?.REALNUMBER()?.text ?: ctx?.methodCall()?.text ?: ctx?.STRING()?.text ?: ctx?.expression()?.text ?: ctx?.WORD(1)?.text
 
-        if (ctx?.WORD()?.size == 2 && isBuiltInType)
+        if (ctx?.WORD()?.size == 1 && isBuiltInType)
         {
-            if (!isCorrectType(TSType(type!!), ctx?.WORD(1)?.text!!))
+            if (!isCorrectType(TSType(type!!), getType(rhs!!)))
+            //if (!isCorrectType(TSType(type!!), ctx?.(0)?.text!!))
             {
                 throw RuntimeException("Variable on right side of assignment" +
-                        " to ${varName} is of incorrect type! (type ${getType(varName!!)}")
+                        " to ${varName} is of incorrect type! (variable ${varName})")
             }
         }
 
@@ -119,7 +122,16 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
             if (!isCorrectType(TSType(type!!), ctx?.methodCall()?.WORD(0)?.text!!))
             {
                 throw RuntimeException("Variable on right side of assignment" +
-                        " to ${varName} is of incorrect type! (type ${getType(varName!!)})")
+                        " to ${varName} is of incorrect type! (type ${getType(varName!!).type})")
+            }
+        }
+
+        else if (ctx?.WORD()?.size == 2 && isBuiltInType)
+        {
+            if (!isCorrectType(TSType(type!!), getType(rhs!!)))
+            {
+                throw RuntimeException("Variable on right side of assignment" +
+                        " to ${varName} is of incorrect type! (type ${getType(rhs!!).type})")
             }
         }
 
@@ -128,7 +140,7 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
             if (!isCorrectType(TSType(type!!), ctx?.WORD(2)?.text!!))
             {
                 throw RuntimeException("Variable on right side of assignment" +
-                        " to ${varName} is of incorrect type! (type ${getType(varName!!)}")
+                        " to ${varName} is of incorrect type! (type ${getType(varName!!).type})")
             }
         }
 
@@ -140,7 +152,6 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
             }
         }
         currentScope[varName!!] = Symbol(varName, TSType(type!!))
-
         super.visitDeclaration(ctx)
     }
 
@@ -176,6 +187,10 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
                 globalScope[rhs]?.type?.parents?.contains(lhs)!!
     }
 
+    fun isCorrectType(lhs: TSType, rhs: TSType): Boolean {
+        return lhs.type == rhs.type || rhs.parents.contains(lhs)
+    }
+
     fun isCorrectType(lhs: String, rhs: String): Boolean {
 
         val lhsType = getType(lhs);
@@ -198,13 +213,13 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
     fun getType(variable: String): TSType {
 
         if (variable.toIntOrNull() != null) {
-            return TSType("int")
+            return typeSystem.types["int"]!!
         } else if (variable.toFloatOrNull() != null) {
-            return TSType("float")
+            return typeSystem.types["float"]!!
         } else if (variable.startsWith("\"")
             && variable.endsWith("\"")
             && variable.filter { it == '"' }.length == 2) {
-            return TSType("string")
+            return typeSystem.types["string"]!!
         }
 
         var currScope : Scope? = currentScope;

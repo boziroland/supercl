@@ -23,17 +23,10 @@ fun main() {
     val globalSymbolTable = globalVisitor.visitProgram(program)
     val detailedVisitor = DetailedVisitor()
     detailedVisitor.globalScope = globalSymbolTable as Scope
+    detailedVisitor.typeSystem = globalVisitor.typeSystem
 
     detailedVisitor.visitProgram(program);
 
 
     println("main end")
-}
-
-fun initTypeSystem() {
-    TypeSystem.types["NullType"]?.parents?.add(TypeSystem.types["string"]!!)
-    TypeSystem.types["ErrorType"]?.parents?.add(TypeSystem.types["int"]!!)
-    TypeSystem.types["ErrorType"]?.parents?.add(TypeSystem.types["bool"]!!)
-    TypeSystem.types["ErrorType"]?.parents?.add(TypeSystem.types["float"]!!)
-    TypeSystem.types["ErrorType"]?.parents?.add(TypeSystem.types["NullType"]!!)
 }
