@@ -26,6 +26,7 @@ class TypeSystem {
 
         types[type.type] = type
         types["NullType"]?.parents?.add(type)
+        types["ErrorType"]?.parents?.add(type)
 
         return true
     }
