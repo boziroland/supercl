@@ -20,20 +20,24 @@ for
     : FOR LPARENT declaration SEMI expression SEMI expression RPARENT block
     ;
 
+className
+    : WORD
+    ;
+
 class
-    : CLASS WORD BLOCKBEGIN (TYPE WORD)+ BLOCKEND
+    : CLASS className (EXTENDS className)? BLOCKBEGIN ((typeName WORD) | method)+ BLOCKEND
     ;
 
 parameter
-    :   MEMORY_QUALIFIER? TYPE WORD
+    :   MEMORY_QUALIFIER? typeName WORD
     ;
 
 methodHeader
-    : (KERNEL | TYPE) WORD LPARENT parameter (COMMA parameter)* RPARENT
+    : (KERNEL | typeName) WORD LPARENT parameter (COMMA parameter)* RPARENT
     ;
 
 method
-    : methodHeader block
+    : methodHeader methodBody
     ;
 
 while
@@ -48,6 +52,10 @@ block
     : BLOCKBEGIN (statement)* BLOCKEND
     ;
 
+methodBody
+    : BLOCKBEGIN (statement)* (RETURN expressionWithReturnValue)? BLOCKEND
+    ;
+
 singleLineComment
     : INLINECOMMENT WORD*
     ;
@@ -57,15 +65,15 @@ multiLineComment
     ;
 
 methodCall
-    : WORD LPARENT (WORD | REALNUMBER | STRING | methodCall) (',' (WORD | REALNUMBER | STRING | methodCall))* RPARENT
+    : WORD LPARENT (WORD | REALNUMBER | STRING | methodCall | variable) (',' (WORD | REALNUMBER | STRING | methodCall | variable))* RPARENT
     ;
 
 declaration
-    : MEMORY_QUALIFIER? (TYPE | WORD) WORD ASSIGN (WORD | REALNUMBER | methodCall | STRING | expression)
+    : MEMORY_QUALIFIER? typeName variable ASSIGN (WORD | REALNUMBER | methodCall | STRING | expression | variable)
     ;
 
 assignment
-    : WORD (ASSIGN | specialAssign) (WORD | REALNUMBER | methodCall | STRING | expression)
+    : variable (ASSIGN | specialAssign) (WORD | REALNUMBER | methodCall | STRING | expression | variable)
     ;
 
 expression
@@ -73,19 +81,31 @@ expression
     ;
 
 prefixOperator
-    : (PLUSPLUS | MINUSMINUS) WORD
+    : (PLUSPLUS | MINUSMINUS) (WORD | variable)
     ;
 
 postfixOperator
-    : WORD (PLUSPLUS | MINUSMINUS)
+    : (WORD | variable) (PLUSPLUS | MINUSMINUS)
     ;
 
+expressionWithReturnValue
+: (variable | WORD | REALNUMBER | methodCall | STRING)
+;
+
 binaryOperator
-    : (WORD | REALNUMBER | methodCall | STRING) (PLUS | MINUS | STAR | MOD | DIV | EQUAL | NOTEQUAL | LESS | LESSEQUAL | GREATER | GREATEREQUAL) (WORD | REALNUMBER | methodCall | STRING)
+    : (variable | WORD | REALNUMBER | methodCall | STRING) (PLUS | MINUS | STAR | MOD | DIV | EQUAL | NOTEQUAL | LESS | LESSEQUAL | GREATER | GREATEREQUAL) expressionWithReturnValue
     ;
 
 specialAssign
     : STARASSIGN | DIVASSIGN | MODASSIGN | PLUSASSIGN | MINUSASSIGN | ANDASSIGN | XORASSIGN | ORASSIGN
+    ;
+
+variable
+    : WORD ('.' (WORD | methodCall))*
+    ;
+
+typeName
+    : TYPE | WORD
     ;
 
 TYPE
@@ -210,6 +230,26 @@ WHILE
 
 DEF
     : 'def'
+    ;
+
+EXTENDS
+    : 'extends'
+    ;
+
+PRIVATE
+    : 'private'
+    ;
+
+PUBLIC
+    : 'public'
+    ;
+
+PROTECTED
+    : 'protected'
+    ;
+
+RETURN
+    : 'return'
     ;
 
 WS	: 	(' '| '\t' | '\n' | '\r') -> skip

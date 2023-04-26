@@ -1,10 +1,21 @@
 class ParticleData {
     int pressure
     float density
+
+    void testClassMethod(int test) {
+    }
 }
 
-void print(string str) {
+class ParticleData2 extends ParticleData {
+    int pressure2
+    float density2
 
+    void testClassMethod2(int test) {
+    }
+
+    ParticleData testClassMethod3(int test) {
+        return ParticleData(3, 3.0)
+    }
 }
 
 float PI = 3.14159 // this is pi
@@ -38,15 +49,20 @@ int calculateDensity(int inputData, float size) {
 
     inputData++
     ++inputData
-    ParticleData p = ParticleData(3, 4)
+    int a = 5 * 3.0
+    ParticleData2 p = ParticleData2(3, 4)
+    print(p.density)
+    print(p.density2)
+    print(p.testClassMethod(5).density2)
+    print(p.testClassMethod2(5))
     int data2 = 5
     inputData = inputData * data2
 
     if (data2 == 5){
         print(p)
         int data3 = 5
+        print(data3)
     }
-    print(data3)
 }
 
 /*
@@ -59,6 +75,6 @@ float calculatePressureAndViscosityForce(int inputData, int size) {
 __kernel doSomething(__global float param1, __local  int param2, string param3) {
     calculatePressureAndViscosityForce(
         calculateDensity(inputData, 5),
-        calculatePressureAndViscosityForce(inputData, size)
+        calculatePressureAndViscosityForce(inputData, 5)
         )
 }

@@ -48,6 +48,16 @@ public interface kernelListener extends ParseTreeListener {
 	 */
 	void exitFor(kernelParser.ForContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link kernelParser#className}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassName(kernelParser.ClassNameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link kernelParser#className}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassName(kernelParser.ClassNameContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link kernelParser#class}.
 	 * @param ctx the parse tree
 	 */
@@ -117,6 +127,16 @@ public interface kernelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBlock(kernelParser.BlockContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link kernelParser#methodBody}.
+	 * @param ctx the parse tree
+	 */
+	void enterMethodBody(kernelParser.MethodBodyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link kernelParser#methodBody}.
+	 * @param ctx the parse tree
+	 */
+	void exitMethodBody(kernelParser.MethodBodyContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link kernelParser#singleLineComment}.
 	 * @param ctx the parse tree
@@ -198,6 +218,16 @@ public interface kernelListener extends ParseTreeListener {
 	 */
 	void exitPostfixOperator(kernelParser.PostfixOperatorContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link kernelParser#expressionWithReturnValue}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpressionWithReturnValue(kernelParser.ExpressionWithReturnValueContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link kernelParser#expressionWithReturnValue}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpressionWithReturnValue(kernelParser.ExpressionWithReturnValueContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link kernelParser#binaryOperator}.
 	 * @param ctx the parse tree
 	 */
@@ -217,4 +247,24 @@ public interface kernelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSpecialAssign(kernelParser.SpecialAssignContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link kernelParser#variable}.
+	 * @param ctx the parse tree
+	 */
+	void enterVariable(kernelParser.VariableContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link kernelParser#variable}.
+	 * @param ctx the parse tree
+	 */
+	void exitVariable(kernelParser.VariableContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link kernelParser#typeName}.
+	 * @param ctx the parse tree
+	 */
+	void enterTypeName(kernelParser.TypeNameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link kernelParser#typeName}.
+	 * @param ctx the parse tree
+	 */
+	void exitTypeName(kernelParser.TypeNameContext ctx);
 }

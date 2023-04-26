@@ -35,6 +35,12 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFor(kernelParser.ForContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link kernelParser#className}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassName(kernelParser.ClassNameContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link kernelParser#class}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -76,6 +82,12 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBlock(kernelParser.BlockContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link kernelParser#methodBody}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMethodBody(kernelParser.MethodBodyContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link kernelParser#singleLineComment}.
 	 * @param ctx the parse tree
@@ -125,6 +137,12 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPostfixOperator(kernelParser.PostfixOperatorContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link kernelParser#expressionWithReturnValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExpressionWithReturnValue(kernelParser.ExpressionWithReturnValueContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link kernelParser#binaryOperator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -136,4 +154,16 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSpecialAssign(kernelParser.SpecialAssignContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link kernelParser#variable}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVariable(kernelParser.VariableContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link kernelParser#typeName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeName(kernelParser.TypeNameContext ctx);
 }

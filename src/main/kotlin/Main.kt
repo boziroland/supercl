@@ -5,6 +5,7 @@ import kernel.antlr.kernelParser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import symboltable.Scope
+import typesystem.ExpressionTypeChecker
 import typesystem.TypeSystem
 import java.io.File
 
@@ -24,6 +25,7 @@ fun main() {
     val detailedVisitor = DetailedVisitor()
     detailedVisitor.globalScope = globalSymbolTable as Scope
     detailedVisitor.typeSystem = globalVisitor.typeSystem
+    detailedVisitor.expressionTypeChecker = ExpressionTypeChecker(globalVisitor.typeSystem)
 
     detailedVisitor.visitProgram(program);
 

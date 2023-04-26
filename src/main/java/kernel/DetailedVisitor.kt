@@ -1,32 +1,46 @@
 package kernel
 
+import Errors
+import MyError
 import kernel.antlr.kernelBaseVisitor
 import kernel.antlr.kernelParser
+import org.antlr.v4.runtime.ParserRuleContext
 import org.apache.commons.lang3.StringUtils
 import symboltable.Scope
 import symboltable.Symbol
+import typesystem.ExpressionTypeChecker
 import typesystem.TSType
 import typesystem.TypeSystem
+import java.awt.SystemColor.text
 
 class DetailedVisitor : kernelBaseVisitor<Any>() {
 
     lateinit var globalScope: Scope
     lateinit var typeSystem: TypeSystem
     lateinit var currentScope: Scope
+    lateinit var expressionTypeChecker: ExpressionTypeChecker
+
+    private val errors = Errors()
 
     override fun visitProgram(ctx: kernelParser.ProgramContext?) {
 
         currentScope = globalScope
 
         super.visitProgram(ctx)
+
+
+        print(errors.getErrors())
     }
 
-    override fun visitClass(ctx: kernelParser.ClassContext?) { // dataclass
+    override fun visitClass(ctx: kernelParser.ClassContext?) {
         val name = ctx?.text
         val vars = ctx?.WORD()
+        val methods = ctx?.method()
+        val parent = if (ctx?.EXTENDS() != null) ctx.WORD(1)!!.text else "-"
 
         currentScope = Scope(parent = currentScope, name = name!!)
         vars!!.forEach { e -> currentScope[name] = Symbol(e.text, TSType(name)) }
+        methods!!.forEach { m -> currentScope[name] = Symbol(m.text, TSType(m.methodHeader().typeName().text?: "void")) }
 
         super.visitClass(ctx).also {
             currentScope = currentScope.parent!!
@@ -34,8 +48,8 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
     }
 
     override fun visitParameter(ctx: kernelParser.ParameterContext?) {
-        val type = ctx?.TYPE()?.text!!
-        val name = ctx.WORD()?.text
+        val type = ctx?.typeName()?.text!!
+        val name = ctx?.WORD()?.text
 
         currentScope = Scope(parent = currentScope, name = name!!)
         currentScope[name] = Symbol(name, TSType(type))
@@ -43,44 +57,60 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
         super.visitParameter(ctx)
     }
 
-    override fun visitMethod(ctx: kernelParser.MethodContext?): Any {
+    override fun visitMethod(ctx: kernelParser.MethodContext?) {
         val methodName = ctx?.methodHeader()?.WORD()?.text!!
-        val retVal = ctx?.methodHeader()?.TYPE()?.text ?: ctx?.methodHeader()?.KERNEL()?.text!!
-        val assignments = ctx.block()?.statement()?.filter { a -> a.assignment() != null }
+        val retVal = ctx.methodHeader().typeName()?.text ?: ctx?.methodHeader()?.KERNEL()?.text!!
+        val assignments = ctx.methodBody()?.statement()?.filter { a -> a.assignment() != null }
 
         if (!isInScope(methodName)) {
-            throw RuntimeException("No such method defined!")
+            errors.add(MyError("No such method defined!", ctx.start.line, ctx.start.charPositionInLine))
         }
 
-        currentScope = Scope(parent = currentScope, name = methodName!!)
+        currentScope = Scope(parent = currentScope)
 
         assignments?.forEach { a ->
             run {
-                val varName = a.assignment().WORD(0).text
+                val varName = a.assignment().variable(0).text
                 currentScope[varName] = Symbol(varName, TSType(retVal))
             }
         }
 
-        return super.visitMethod(ctx).also {
-            currentScope = currentScope.parent!!
+        super.visitMethod(ctx).also {
+            if (currentScope.parent != null) {
+                currentScope = currentScope.parent!!
+            }
         }
     }
 
     override fun visitAssignment(ctx: kernelParser.AssignmentContext?) {
 
-    if (ctx?.WORD()?.size == 2)
+    if (ctx?.variable()?.size == 2)
     {
-        if (!isCorrectType(ctx.WORD(0).text, ctx.WORD(1).text))
+        if (!isCorrectType(ctx?.variable(0)?.text!!, ctx?.variable(0)?.text!!))
         {
-            throw RuntimeException("Variable on right side of assignment" + " is of incorrect type!")
+            errors.add(MyError("Variable on right side of assignment is of incorrect type!", ctx.start.line, ctx.start.charPositionInLine))
         }
     }
-    else if (ctx?.methodCall() != null)
-    {
-        if (!isCorrectType(ctx.WORD(0).text, ctx.methodCall().WORD(0).text))
-        {
-            throw RuntimeException("Method on right side of assignment" +
-                    " has incorrect return value!")
+    else if (ctx?.methodCall() != null) {
+        if (!isCorrectType(ctx.variable()[0].text!!, ctx?.variable(0)?.text!!)) {
+            errors.add(
+                MyError(
+                    "Method on right side of assignment has incorrect return value!",
+                    ctx.start.line,
+                    ctx.start.charPositionInLine
+                )
+            )
+        }
+    }
+    else if (ctx?.expression() != null) {
+        if (!isCorrectType(ctx.variable()[0].text!!, (ctx.expression()!!.children[0] as ParserRuleContext).children[0].text)) {
+            errors.add(
+                MyError(
+                    "Expression on right side of assignment has incorrect type!",
+                    ctx.start.line,
+                    ctx.start.charPositionInLine
+                )
+            )
         }
     }
 
@@ -88,8 +118,8 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
 }
 
     override fun visitFor(ctx: kernelParser.ForContext?): Any {
-        val loopVar = ctx?.declaration()?.WORD(0)?.text
-        val loopVarType = ctx?.declaration()?.TYPE()?.text!!
+        val loopVar = ctx?.declaration()?.variable(0)?.text
+        val loopVarType = ctx?.declaration()?.typeName()?.text!!
 
         currentScope = Scope(parent = currentScope, name = "for_loop")
         currentScope[loopVar!!] = Symbol(loopVar, TSType(loopVarType))
@@ -110,44 +140,41 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
     }
 
     override fun visitDeclaration(ctx: kernelParser.DeclarationContext?) {
-        val isBuiltInType = typeSystem.getBuiltInTypes().contains(ctx?.TYPE()?.text)
-        val type = ctx?.TYPE()?.text ?: ctx?.WORD(0)?.text
-        val varName = if (isBuiltInType) ctx?.WORD(0)?.text else ctx?.WORD(1)?.text
-        val rhs : String? = ctx?.WORD(2)?.text?: ctx?.REALNUMBER()?.text ?: ctx?.methodCall()?.text ?: ctx?.STRING()?.text ?: ctx?.expression()?.text ?: ctx?.WORD(1)?.text
+        val isBuiltInType = typeSystem.getBuiltInTypes().contains(ctx?.typeName()?.text)
+        var type = ctx?.typeName()?.text ?: ctx?.variable(0)?.text
+        val varName = ctx?.variable(0)?.text
+        val rhs : String? = ctx?.expression()?.text ?: ctx?.variable(1)?.text?: ctx?.REALNUMBER()?.text ?: ctx?.methodCall()?.text ?: ctx?.STRING()?.text ?: ctx?.WORD()?.text
 
-        if (ctx?.WORD()?.size == 1 && isBuiltInType)
+        if (type == "var")
         {
-            if (!isCorrectType(TSType(type!!), getType(rhs!!)))
+            type = getType(rhs!!).type
+        }
+
+        if (ctx?.expression() != null) {
+            currentScope[rhs!!] = Symbol(rhs, TSType("int"))
+        }
+
+        if (/*ctx?.WORD()?.size == 1 &&*/ isBuiltInType)
+        {
+            if (ctx?.expression()?.binaryOperator() != null)
             {
-                throw RuntimeException("Variable on right side of assignment" +
-                        " to ${varName} is of incorrect type! (variable ${varName})")
+                visitBinaryOperator(ctx.expression().binaryOperator())
             }
         }
 
-        else if (ctx?.WORD()?.size == 2 && !isBuiltInType)
+        else if (/*ctx?.WORD()?.size == 2 && */!isBuiltInType)
         {
             if (!isCorrectType(TSType(type!!), ctx?.methodCall()?.WORD(0)?.text!!))
             {
-                throw RuntimeException("Variable on right side of assignment" +
-                        " to ${varName} is of incorrect type! (type ${getType(varName!!).type})")
+                errors.add(MyError("Variable on right side of assignment to ${varName} is of incorrect type! (type ${getType(varName!!).type})", ctx.start.line, ctx.start.charPositionInLine))
             }
         }
 
-        else if (ctx?.WORD()?.size == 2 && isBuiltInType)
+        else if (/*ctx?.WORD()?.size == 2 && */isBuiltInType)
         {
             if (!isCorrectType(TSType(type!!), getType(rhs!!)))
             {
-                throw RuntimeException("Variable on right side of assignment" +
-                        " to ${varName} is of incorrect type! (type ${getType(rhs!!).type})")
-            }
-        }
-
-        else if (ctx?.WORD()?.size == 3)
-        {
-            if (!isCorrectType(TSType(type!!), ctx?.WORD(2)?.text!!))
-            {
-                throw RuntimeException("Variable on right side of assignment" +
-                        " to ${varName} is of incorrect type! (type ${getType(varName!!).type})")
+                errors.add(MyError("Variable on right side of assignment to ${varName} is of incorrect type! (type ${getType(varName!!).type})", ctx.start.line, ctx.start.charPositionInLine))
             }
         }
 
@@ -155,7 +182,9 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
         {
             if (globalScope[varName!!] != null)
             {
-                throw RuntimeException("Variable already defined!")
+                if (ctx != null) { // TODO
+                    errors.add(MyError("Variable already defined!", ctx.start.line, ctx.start.charPositionInLine))
+                }
             }
         }
         currentScope[varName!!] = Symbol(varName, TSType(type!!))
@@ -164,16 +193,15 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
 
     override fun visitMethodCall(ctx: kernelParser.MethodCallContext?) {
         val methodName = ctx?.text!!
-        val params = ctx?.WORD()?.subList(1, ctx.WORD()!!.size)!!
-
+        val params = ctx.children.subList(2, ctx.children.size).filterIndexed { i, _ -> i % 2 == 0 }
         params.forEach {
             if (!isInScope(it.text)) {
-                throw RuntimeException("Variable ${it} not in scope when calling method ${methodName}!")
+                errors.add(MyError("Variable ${it.text} not in scope when calling method ${methodName}!", ctx.start.line, ctx.start.charPositionInLine))
             }
         }
 
-        if (isInScope(methodName)) {
-            throw RuntimeException("No such method defined!")
+        if (!isInScope(methodName)) {
+            errors.add(MyError("No such method defined!", ctx.start.line, ctx.start.charPositionInLine))
         }
 
         super.visitMethodCall(ctx)
@@ -181,14 +209,13 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
 
 
     override fun visitBinaryOperator(ctx: kernelParser.BinaryOperatorContext?) {
-        val rhs = ctx?.WORD(0)?.text ?: ctx?.REALNUMBER(0)?.text ?: ctx?.methodCall(0)?.WORD(0)?.text ?: ctx?.STRING(0)?.text
-        val lhs = ctx?.WORD(1)?.text ?: ctx?.REALNUMBER(0)?.text ?: ctx?.methodCall(0)?.WORD(0)?.text ?: ctx?.STRING(0)?.text
+        val rhs = ctx?.children?.get(0)?.text
+        val lhs = ctx?.children?.get(2)?.text
 
-        val typeRight = getType(rhs!!)?.type
-        val typeLeft = getType(lhs!!)?.type
-
-        if (typeLeft != typeRight) {
-            throw RuntimeException("The types on the 2 sides of the expression are not the same!")
+        try {
+            val returnType = expressionTypeChecker.getReturnType(currentScope, rhs, lhs)
+        } catch (e: RuntimeException) {
+            errors.add(MyError(e.localizedMessage, ctx?.start?.line!!, ctx.start?.charPositionInLine!!))
         }
 
         super.visitBinaryOperator(ctx)
@@ -212,12 +239,23 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
     }
 
     fun isInScope(variable: String): Boolean {
+        if ((variable.startsWith("\"") && variable.endsWith("\"")) || variable.toDoubleOrNull() != null) {
+            return true
+        }
+
         var currScope : Scope? = currentScope
+        var lastDot = variable.lastIndexOf('.')
+//        var actualVariable = if (lastDot == -1) variable else variable.substring(lastDot + 1)
+//        var mainVariable = if (lastDot == -1) variable else variable.substring(0, lastDot)
+        val varsInChain = variable.split(".")
         while (currScope != null) {
-            if (currScope.keys.contains(variable)) {
-                return true
+            varsInChain.forEachIndexed { i, _ ->
+                if (currScope!!.keys.contains(varsInChain[i])) {
+                    currScope = currScope!!.parent
+                }
             }
-            currScope = currScope.parent
+            return true
+            currScope = currScope!!.parent
         }
         return false
     }
@@ -241,7 +279,11 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
             }
             currScope = currScope.parent
         }
-        throw RuntimeException("No type defined for variable ${variable}!")
+        throw RuntimeException("Either no type defined for variable ${variable} or it could not be deduced!")
+    }
+
+    fun getNonPrivateParentMethods() {
+
     }
 
 }
