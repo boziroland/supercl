@@ -50,6 +50,7 @@ int calculateDensity(int inputData, float size) {
     inputData++
     ++inputData
     int a = 5 * 3.0
+    int b = (int)3.14
     ParticleData2 p = ParticleData2(3, 4)
     print(p.density)
     print(p.density2)

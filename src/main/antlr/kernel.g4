@@ -33,7 +33,7 @@ parameter
     ;
 
 methodHeader
-    : (KERNEL | typeName) WORD LPARENT parameter (COMMA parameter)* RPARENT
+    : (KERNEL | typeName) WORD LPARENT parameter? (COMMA parameter)* RPARENT
     ;
 
 method
@@ -69,11 +69,11 @@ methodCall
     ;
 
 declaration
-    : MEMORY_QUALIFIER? typeName variable ASSIGN (WORD | REALNUMBER | methodCall | STRING | expression | variable)
+    : MEMORY_QUALIFIER? typeName variable ASSIGN cast? (WORD | REALNUMBER | methodCall | STRING | expression | variable)
     ;
 
 assignment
-    : variable (ASSIGN | specialAssign) (WORD | REALNUMBER | methodCall | STRING | expression | variable)
+    : variable (ASSIGN | specialAssign) cast? (WORD | REALNUMBER | methodCall | STRING | expression | variable)
     ;
 
 expression
@@ -106,6 +106,10 @@ variable
 
 typeName
     : TYPE | WORD
+    ;
+
+cast
+    : LPARENT (TYPE | className) RPARENT
     ;
 
 TYPE

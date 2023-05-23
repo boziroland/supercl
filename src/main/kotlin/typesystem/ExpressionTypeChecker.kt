@@ -24,11 +24,29 @@ class ExpressionTypeChecker(
         return resultType
     }
 
+    fun valueConverter(value: String, convertTo: String, convertFrom: String): String {
+        if (convertFrom == "float") {
+            if (convertTo == "int") {
+                return value.substring(0, value.indexOf('.'))
+            }
+        }
+
+        if (isClass(convertFrom) && typeSystem.isParent(convertFrom, convertTo)) {
+            return value;
+        }
+
+        return "";
+    }
+
+    public fun isClass(type: String): Boolean {
+        return !typeSystem.getBuiltInTypes().contains(type)
+    }
+
     private fun determineResultType(rhs: String, lhs: String): String {
         return if (typePrecedence.indexOf(rhs) < typePrecedence.indexOf(lhs)) rhs else lhs
     }
 
-    private fun getType(currentScope: Scope, variable: String): TSType {
+    public fun getType(currentScope: Scope, variable: String): TSType {
 
         if (variable.toIntOrNull() != null) {
             return typeSystem.types["int"]!!

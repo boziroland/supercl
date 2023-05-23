@@ -6,18 +6,21 @@ import kernel.antlr.kernelBaseVisitor
 import kernel.antlr.kernelParser
 import org.antlr.v4.runtime.ParserRuleContext
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.StringUtils.startsWith
 import symboltable.ClassSymbol
 import symboltable.MethodSymbol
 import symboltable.Scope
 import symboltable.Symbol
+import typesystem.ExpressionTypeChecker
 import typesystem.TSType
 import typesystem.TypeSystem
 
 class GlobalVisitor : kernelBaseVisitor<Any>() {
 
     private val globalScope = Scope(parent = null, name = "GLOBAL")
-    private val errors = Errors()
+    val errors = Errors()
     val typeSystem = TypeSystem()
+    var expressionTypeChecker = ExpressionTypeChecker(typeSystem)
 
     override fun visitProgram(ctx: kernelParser.ProgramContext?): Any {
         globalScope["print"] = MethodSymbol("print", TSType("void"))
@@ -72,7 +75,7 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
             }
         }
 
-        globalScope[varName!!] = Symbol(varName, tType)
+        globalScope[varName] = Symbol(rhs!!, tType)
 
         super.visitDeclaration(ctx)
     }
@@ -120,8 +123,9 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
     }
 
     override fun visitMethod(ctx: kernelParser.MethodContext) {
-        val retVal = ctx?.methodHeader()?.typeName()?.text ?: ctx?.methodHeader()?.KERNEL()?.text  ?: throw RuntimeException("No return value name given!")
-        val name = ctx.methodHeader()?.WORD()?.text ?: throw RuntimeException("No method name given!")
+        val retType = ctx.methodHeader().typeName()?.text ?: "void"
+        val retVal = ctx.methodBody().expressionWithReturnValue()?.text
+        val name = ctx.methodHeader()?.WORD()?.text
         val params = ctx.methodHeader().parameter();
 
         if (globalScope[name] != null)
@@ -129,14 +133,21 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
             errors.add(MyError("Method already defined!", ctx.start.line, ctx.start.charPositionInLine))
         }
 
-        val method = MethodSymbol(name, TSType(retVal))
+        if (retType != "void" && retType != expressionTypeChecker.getType(globalScope, retVal!!).type) {
+            errors.add(MyError("Incorrect return type!", ctx.start.line, ctx.start.charPositionInLine))
+        }
+
+        if (name == null) {
+            errors.add(MyError("No method name given!", ctx.start.line, ctx.start.charPositionInLine))
+            return // TODO
+        }
+
+        val method = MethodSymbol(name, TSType(retType))
         params.forEach { p -> method.parameters[p.WORD().text] = TSType(p.typeName().text) }
 
         globalScope[name] = method
 
     }
-
-    override fun visitIf(ctx: kernelParser.IfContext?) {}
 
     private fun isCorrectType(lhs: TSType, rhs: String?): Boolean {
         return lhs.type == globalScope[rhs]?.type?.type ||
@@ -155,6 +166,10 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
             return typeSystem.types["int"]
         } else if (variable?.toFloatOrNull() != null) {
             return typeSystem.types["float"]
+        } else if (variable == "true" || variable == "false") {
+            return typeSystem.types["bool"]
+        } else if (variable?.startsWith("\"") == true && variable.endsWith("\"")) {
+            return typeSystem.types["string"]
         }
 
         return typeSystem.types[variable]

@@ -18,6 +18,7 @@ dependencies {
     antlr("org.antlr:antlr4:4.10.1")
     implementation("org.apache.commons:commons-lang3:3.6")
     implementation(kotlin("stdlib-jdk8"))
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 }
 
 tasks.test {

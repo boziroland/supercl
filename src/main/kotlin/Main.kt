@@ -27,7 +27,7 @@ fun main() {
     detailedVisitor.typeSystem = globalVisitor.typeSystem
     detailedVisitor.expressionTypeChecker = ExpressionTypeChecker(globalVisitor.typeSystem)
 
-    detailedVisitor.visitProgram(program);
+    detailedVisitor.visitProgram(program)
 
 
     println("main end")

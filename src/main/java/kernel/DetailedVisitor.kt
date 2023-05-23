@@ -11,7 +11,6 @@ import symboltable.Symbol
 import typesystem.ExpressionTypeChecker
 import typesystem.TSType
 import typesystem.TypeSystem
-import java.awt.SystemColor.text
 
 class DetailedVisitor : kernelBaseVisitor<Any>() {
 
@@ -59,11 +58,18 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
 
     override fun visitMethod(ctx: kernelParser.MethodContext?) {
         val methodName = ctx?.methodHeader()?.WORD()?.text!!
-        val retVal = ctx.methodHeader().typeName()?.text ?: ctx?.methodHeader()?.KERNEL()?.text!!
+        val retType = ctx.methodHeader().typeName()?.text ?: ctx?.methodHeader()?.KERNEL()?.text!!
+        val retVal = ctx.methodBody().expressionWithReturnValue()?.text
         val assignments = ctx.methodBody()?.statement()?.filter { a -> a.assignment() != null }
 
         if (!isInScope(methodName)) {
             errors.add(MyError("No such method defined!", ctx.start.line, ctx.start.charPositionInLine))
+        }
+
+        if (retVal != null) {
+            if (retType != expressionTypeChecker.getType(currentScope, retVal).type) {
+                errors.add(MyError("Incorrect return type!", ctx.start.line, ctx.start.charPositionInLine))
+            }
         }
 
         currentScope = Scope(parent = currentScope)
@@ -71,7 +77,7 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
         assignments?.forEach { a ->
             run {
                 val varName = a.assignment().variable(0).text
-                currentScope[varName] = Symbol(varName, TSType(retVal))
+                currentScope[varName] = Symbol(varName, TSType(retType))
             }
         }
 
@@ -141,9 +147,18 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
 
     override fun visitDeclaration(ctx: kernelParser.DeclarationContext?) {
         val isBuiltInType = typeSystem.getBuiltInTypes().contains(ctx?.typeName()?.text)
+        val cast = (ctx?.cast() != null)
         var type = ctx?.typeName()?.text ?: ctx?.variable(0)?.text
         val varName = ctx?.variable(0)?.text
-        val rhs : String? = ctx?.expression()?.text ?: ctx?.variable(1)?.text?: ctx?.REALNUMBER()?.text ?: ctx?.methodCall()?.text ?: ctx?.STRING()?.text ?: ctx?.WORD()?.text
+        var rhs : String? = ctx?.expression()?.text ?: ctx?.variable(1)?.text?: ctx?.REALNUMBER()?.text ?: ctx?.methodCall()?.text ?: ctx?.STRING()?.text ?: ctx?.WORD()?.text
+        val rhsType = getType(rhs!!).type
+        if (cast) {
+            if (expressionTypeChecker.isClass(rhsType)) {
+                currentScope[varName!!] = Symbol(varName, TSType(rhsType))
+            } else {
+                rhs = expressionTypeChecker.valueConverter(rhs, ctx?.cast()?.text!!, rhsType)
+            }
+        }
 
         if (type == "var")
         {
@@ -151,10 +166,10 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
         }
 
         if (ctx?.expression() != null) {
-            currentScope[rhs!!] = Symbol(rhs, TSType("int"))
+            currentScope[rhs!!] = Symbol(rhs, TSType(type!!))
         }
 
-        if (/*ctx?.WORD()?.size == 1 &&*/ isBuiltInType)
+        if (isBuiltInType)
         {
             if (ctx?.expression()?.binaryOperator() != null)
             {
@@ -213,7 +228,7 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
         val lhs = ctx?.children?.get(2)?.text
 
         try {
-            val returnType = expressionTypeChecker.getReturnType(currentScope, rhs, lhs)
+            expressionTypeChecker.getReturnType(currentScope, rhs, lhs)
         } catch (e: RuntimeException) {
             errors.add(MyError(e.localizedMessage, ctx?.start?.line!!, ctx.start?.charPositionInLine!!))
         }

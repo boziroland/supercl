@@ -31,6 +31,10 @@ class TypeSystem {
         return true
     }
 
+    fun isParent(type: String, possibleParent: String): Boolean {
+        return types[type]?.parents?.map { it.type }?.contains(possibleParent) ?: false
+    }
+
     fun getBuiltInTypes(): Set<String> { return setOf("int", "bool", "float", "string")}
 
 }
