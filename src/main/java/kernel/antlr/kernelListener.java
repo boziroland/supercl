@@ -118,6 +118,16 @@ public interface kernelListener extends ParseTreeListener {
 	 */
 	void exitIf(kernelParser.IfContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link kernelParser#else}.
+	 * @param ctx the parse tree
+	 */
+	void enterElse(kernelParser.ElseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link kernelParser#else}.
+	 * @param ctx the parse tree
+	 */
+	void exitElse(kernelParser.ElseContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link kernelParser#block}.
 	 * @param ctx the parse tree
 	 */
@@ -267,4 +277,24 @@ public interface kernelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTypeName(kernelParser.TypeNameContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link kernelParser#cast}.
+	 * @param ctx the parse tree
+	 */
+	void enterCast(kernelParser.CastContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link kernelParser#cast}.
+	 * @param ctx the parse tree
+	 */
+	void exitCast(kernelParser.CastContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link kernelParser#andandoror}.
+	 * @param ctx the parse tree
+	 */
+	void enterAndandoror(kernelParser.AndandororContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link kernelParser#andandoror}.
+	 * @param ctx the parse tree
+	 */
+	void exitAndandoror(kernelParser.AndandororContext ctx);
 }

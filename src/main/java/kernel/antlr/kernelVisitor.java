@@ -77,6 +77,12 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitIf(kernelParser.IfContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link kernelParser#else}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitElse(kernelParser.ElseContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link kernelParser#block}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -166,4 +172,16 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitTypeName(kernelParser.TypeNameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link kernelParser#cast}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCast(kernelParser.CastContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link kernelParser#andandoror}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAndandoror(kernelParser.AndandororContext ctx);
 }

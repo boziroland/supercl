@@ -148,6 +148,18 @@ public class kernelBaseListener implements kernelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterElse(kernelParser.ElseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitElse(kernelParser.ElseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBlock(kernelParser.BlockContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -323,6 +335,30 @@ public class kernelBaseListener implements kernelListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTypeName(kernelParser.TypeNameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCast(kernelParser.CastContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCast(kernelParser.CastContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAndandoror(kernelParser.AndandororContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAndandoror(kernelParser.AndandororContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

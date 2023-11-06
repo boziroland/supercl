@@ -27,15 +27,14 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
 
         super.visitProgram(ctx)
 
-
         print(errors.getErrors())
     }
 
     override fun visitClass(ctx: kernelParser.ClassContext?) {
-        val name = ctx?.text
-        val vars = ctx?.WORD()
-        val methods = ctx?.method()
-        val parent = if (ctx?.EXTENDS() != null) ctx.WORD(1)!!.text else "-"
+        val name = ctx?.className(0)!!.text
+        val vars = ctx.WORD()
+        val methods = ctx.method()
+        val parent = if (ctx.EXTENDS() != null) ctx.className(1)!!.text else "-"
 
         currentScope = Scope(parent = currentScope, name = name!!)
         vars!!.forEach { e -> currentScope[name] = Symbol(e.text, TSType(name)) }
@@ -60,10 +59,17 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
         val methodName = ctx?.methodHeader()?.WORD()?.text!!
         val retType = ctx.methodHeader().typeName()?.text ?: ctx?.methodHeader()?.KERNEL()?.text!!
         val retVal = ctx.methodBody().expressionWithReturnValue()?.text
-        val assignments = ctx.methodBody()?.statement()?.filter { a -> a.assignment() != null }
+        val assignments = ctx.methodBody()?.statementList()?.statement()?.filter { a -> a.assignment() != null }
 
         if (!isInScope(methodName)) {
             errors.add(MyError("No such method defined!", ctx.start.line, ctx.start.charPositionInLine))
+        }
+
+        assignments?.forEach { a ->
+            run {
+                val varName = a.assignment().variable(0).text
+                currentScope[varName] = Symbol(varName, TSType(retType))
+            }
         }
 
         if (retVal != null) {
@@ -73,13 +79,6 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
         }
 
         currentScope = Scope(parent = currentScope)
-
-        assignments?.forEach { a ->
-            run {
-                val varName = a.assignment().variable(0).text
-                currentScope[varName] = Symbol(varName, TSType(retType))
-            }
-        }
 
         super.visitMethod(ctx).also {
             if (currentScope.parent != null) {

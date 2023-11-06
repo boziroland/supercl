@@ -7,7 +7,7 @@ class Scope(
     val children: MutableList<Scope> = mutableListOf(),
     val name: String = if (parent == null) "Global scope" else "Scope ${level++}",
     private val map: MutableMap<String, Symbol> = hashMapOf(),
-): MutableMap<String, Symbol> by map {
+) : MutableMap<String, Symbol> by map {
     init {
         parent?.children?.add(this)
     }
@@ -18,5 +18,7 @@ class Scope(
         return map.put(key, value)
     }
 
-    object Level { var level = 0 }
+    object Level {
+        var level = 0
+    }
 }

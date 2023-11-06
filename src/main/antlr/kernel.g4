@@ -17,7 +17,7 @@ statement
     ;
 
 for
-    : FOR LPARENT declaration SEMI expression SEMI expression RPARENT block
+    : FOR LPARENT declaration expression SEMI expression RPARENT block
     ;
 
 className
@@ -25,7 +25,7 @@ className
     ;
 
 class
-    : CLASS className (EXTENDS className)? BLOCKBEGIN ((typeName WORD) | method)+ BLOCKEND
+    : CLASS className (EXTENDS className)? BLOCKBEGIN ((typeName WORD SEMI) | method)+ BLOCKEND
     ;
 
 parameter
@@ -45,15 +45,19 @@ while
     ;
 
 if
-    : IF LPARENT expression RPARENT block (ELSE (block | if))*
+    : IF LPARENT expression RPARENT block else*
+    ;
+
+else
+    : ELSE (block | if)
     ;
 
 block
-    : BLOCKBEGIN (statement)* BLOCKEND
+    : BLOCKBEGIN statementList BLOCKEND
     ;
 
 methodBody
-    : BLOCKBEGIN (statement)* (RETURN expressionWithReturnValue)? BLOCKEND
+    : BLOCKBEGIN statementList (RETURN expressionWithReturnValue SEMI)? BLOCKEND
     ;
 
 singleLineComment
@@ -69,7 +73,7 @@ methodCall
     ;
 
 declaration
-    : MEMORY_QUALIFIER? typeName variable ASSIGN cast? (WORD | REALNUMBER | methodCall | STRING | expression | variable)
+    : MEMORY_QUALIFIER? typeName variable (ASSIGN cast? (WORD | REALNUMBER | methodCall | STRING | expression | variable))? SEMI
     ;
 
 assignment
@@ -77,7 +81,7 @@ assignment
     ;
 
 expression
-    : (prefixOperator | postfixOperator | binaryOperator | TRUE) ((AND | OR) expression)*
+    : (prefixOperator | postfixOperator | binaryOperator | TRUE) (andandoror expression)*
     ;
 
 prefixOperator
@@ -89,8 +93,8 @@ postfixOperator
     ;
 
 expressionWithReturnValue
-: (variable | WORD | REALNUMBER | methodCall | STRING)
-;
+    : (variable | WORD | REALNUMBER | methodCall | STRING)
+    ;
 
 binaryOperator
     : (variable | WORD | REALNUMBER | methodCall | STRING) (PLUS | MINUS | STAR | MOD | DIV | EQUAL | NOTEQUAL | LESS | LESSEQUAL | GREATER | GREATEREQUAL) expressionWithReturnValue
@@ -110,6 +114,10 @@ typeName
 
 cast
     : LPARENT (TYPE | className) RPARENT
+    ;
+
+andandoror
+    : (ANDAND | OROR)
     ;
 
 TYPE

@@ -7,5 +7,5 @@ class ClassSymbol(
     val parent: String?
 ) : Symbol(name, TSType(name)) {
     val properties: HashMap<String, TSType> = hashMapOf()
-    val methods: HashMap<String, TSType> = hashMapOf()
+    val methods: MutableList<MethodSymbol> = mutableListOf()
 }

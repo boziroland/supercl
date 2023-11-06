@@ -5,11 +5,10 @@ import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import symboltable.Scope
 
 class GlobalVisitorTest {
 
-    val globalVisitor = GlobalVisitor()
+    private val globalVisitor = GlobalVisitor()
 
     private fun `init`(content: String): kernelParser.ProgramContext {
         val lexer = kernelLexer(CharStreams.fromString(content))
@@ -26,8 +25,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
-
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
         /* THEN */
         Assertions.assertEquals(1, globalSymbolTable.size)
         Assertions.assertTrue(globalSymbolTable.containsKey("print"))
@@ -47,7 +46,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertEquals(2, globalSymbolTable.size)
@@ -68,7 +68,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertEquals(2, globalSymbolTable.size)
@@ -89,7 +90,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertEquals(2, globalSymbolTable.size)
@@ -110,7 +112,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertEquals(2, globalSymbolTable.size)
@@ -131,7 +134,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertNotEquals(0, globalVisitor.errors.getErrors().length)
@@ -149,7 +153,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertTrue(globalVisitor.typeSystem.types.containsKey("BasicClass"))
@@ -170,7 +175,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertTrue(globalVisitor.typeSystem.types.containsKey("BasicClass"))
@@ -189,7 +195,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertNotEquals(0, globalVisitor.errors.getErrors().length)
@@ -209,7 +216,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertEquals(0, globalVisitor.errors.getErrors().length)
@@ -225,7 +233,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertEquals(0, globalVisitor.errors.getErrors().length)
@@ -242,7 +251,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertNotEquals(0, globalVisitor.errors.getErrors().length)
@@ -258,7 +268,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertEquals(0, globalVisitor.errors.getErrors().length)
@@ -274,7 +285,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertEquals(0, globalVisitor.errors.getErrors().length)
@@ -290,7 +302,8 @@ class GlobalVisitorTest {
         )
 
         /* WHEN */
-        val globalSymbolTable = globalVisitor.visitProgram(program) as Scope
+        globalVisitor.visitProgram(program)
+        val globalSymbolTable = globalVisitor.globalScope
 
         /* THEN */
         Assertions.assertNotEquals(0, globalVisitor.errors.getErrors().length)
