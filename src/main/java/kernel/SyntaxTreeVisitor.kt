@@ -4,6 +4,7 @@ import kernel.antlr.kernelBaseVisitor
 import kernel.antlr.kernelParser
 import symboltable.Scope
 import syntaxtree.ClassNode
+import syntaxtree.DeclarationNode
 import syntaxtree.ExpressionNode
 import syntaxtree.ForNode
 import syntaxtree.IfNode
@@ -23,10 +24,8 @@ class SyntaxTreeVisitor(private var globalScope: Scope) : kernelBaseVisitor<Any>
 //        syntaxTree.add(StatementListNode(syntaxTree.last(), ctx!!, tabCounter))
 //    }
 
-    override fun visitExpression(ctx: kernelParser.ExpressionContext?): Any {
+    override fun visitExpression(ctx: kernelParser.ExpressionContext?) {
         syntaxTree.add(ExpressionNode(syntaxTree.last(), ctx))
-
-        return super.visitExpression(ctx)
     }
 
     override fun visitIf(ctx: kernelParser.IfContext?) {
@@ -65,6 +64,10 @@ class SyntaxTreeVisitor(private var globalScope: Scope) : kernelBaseVisitor<Any>
         )
         classes.add(classNode)
         syntaxTree.add(classNode)
+    }
+
+    override fun visitDeclaration(ctx: kernelParser.DeclarationContext?) {
+        syntaxTree.add(DeclarationNode(syntaxTree.last(), ctx!!, tabCounter))
     }
 
     fun generateCode(): String {

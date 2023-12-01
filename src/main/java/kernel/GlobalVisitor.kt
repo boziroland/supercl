@@ -32,11 +32,11 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
     override fun visitDeclaration(ctx: kernelParser.DeclarationContext?) {
         val isBuiltInType = !StringUtils.isBlank(ctx?.typeName()?.text)
         val type = ctx?.typeName()?.text ?: throw RuntimeException("No variable type given!")
-        val varName = ctx?.variable(0)?.text ?: throw RuntimeException("No variable name given!")
+        val varName = ctx?.variable()?.text ?: throw RuntimeException("No variable name given!")
         val tType = TSType(type)
         val rhs: String? =
-            ctx?.variable(1)?.text ?: ctx?.REALNUMBER()?.text ?: ctx?.methodCall()?.text ?: ctx?.STRING()?.text
-            ?: ctx?.expression()?.text ?: ctx?.WORD()?.text
+            ctx?.expression()?.literal()?.variable()?.text ?: ctx?.expression()?.literal()?.text ?: ctx?.expression()?.literal()?.text ?: ctx?.expression()?.literal()?.text
+            ?: ctx?.expression()?.text ?: ctx?.expression()?.literal()?.text
 
         if (/*ctx?.WORD()?.size == 2 && */isBuiltInType) {
             if (!isCorrectType(tType, rhs)) {
@@ -52,7 +52,7 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
                 )
             }
         } else if (/*ctx?.WORD()?.size == 2 && */!isBuiltInType) {
-            if (!isCorrectType(tType, ctx?.methodCall()?.WORD(0)?.text)) {
+            if (!isCorrectType(tType, ctx?.expression()?.literal()?.methodCall()?.WORD(0)?.text)) {
                 errors.add(
                     MyError(
                         "Variable on right side of assignment" +
@@ -76,7 +76,7 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
         if (!StringUtils.isBlank(ctx?.MEMORY_QUALIFIER()?.text)) {
             if (globalScope[varName] != null) {
                 if (ctx != null) { // TODO
-                    errors.add(MyError("Variable already defined!", ctx.start.line, ctx.start.charPositionInLine))
+                    errors.add(MyError("GlobalVisitor: Variable already defined!", ctx.start.line, ctx.start.charPositionInLine))
                 }
             }
         }
@@ -143,7 +143,7 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
     override fun visitMethod(ctx: kernelParser.MethodContext) {
         val kernel = ctx.methodHeader()?.KERNEL()?.text ?: ""
         val retType = ctx.methodHeader().typeName()?.text ?: "void"
-        val retVal = ctx.methodBody().expressionWithReturnValue()?.text
+        val retVal = ctx.methodBody().statementList().statement().filter { it.returnExpression() != null }
         val name = ctx.methodHeader()?.WORD()?.text
         val params = ctx.methodHeader().parameter();
 
@@ -151,8 +151,12 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
             errors.add(MyError("Method already defined!", ctx.start.line, ctx.start.charPositionInLine))
         }
 
-        if (retType != "void" && retType != expressionTypeChecker.getType(globalScope, retVal!!).type) {
-            errors.add(MyError("Incorrect return type!", ctx.start.line, ctx.start.charPositionInLine))
+        if (retVal.isNotEmpty()) {
+            retVal.forEach {
+                if (retType != expressionTypeChecker.getType(globalScope, it.returnExpression().text).type) {
+                    errors.add(MyError("Incorrect return type!", ctx.start.line, ctx.start.charPositionInLine))
+                }
+            }
         }
 
         if (name == null) {

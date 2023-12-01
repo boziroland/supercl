@@ -13,7 +13,7 @@ statementList
     ;
 
 statement
-    : if | for | while | methodHeader | method | declaration | methodCall | singleLineComment | multiLineComment | class | prefixOperator | postfixOperator | assignment
+    : if | for | while | methodHeader | method | declaration | methodCall | singleLineComment | multiLineComment | class | prefixOperator | postfixOperator | assignment | returnExpression
     ;
 
 for
@@ -56,8 +56,12 @@ block
     : BLOCKBEGIN statementList BLOCKEND
     ;
 
+returnExpression
+    : RETURN expressionWithReturnValue SEMI
+    ;
+
 methodBody
-    : BLOCKBEGIN statementList (RETURN expressionWithReturnValue SEMI)? BLOCKEND
+    : BLOCKBEGIN statementList BLOCKEND
     ;
 
 singleLineComment
@@ -73,7 +77,7 @@ methodCall
     ;
 
 declaration
-    : MEMORY_QUALIFIER? typeName variable (ASSIGN cast? (WORD | REALNUMBER | methodCall | STRING | expression | variable))? SEMI
+    : MEMORY_QUALIFIER? typeName variable (ASSIGN cast? LPARENT* expression RPARENT*)? SEMI
     ;
 
 assignment
@@ -81,7 +85,11 @@ assignment
     ;
 
 expression
-    : (prefixOperator | postfixOperator | binaryOperator | TRUE) (andandoror expression)*
+    : LPARENT* (prefixOperator | postfixOperator | binaryOperator | literal) ((andandoror) expression)* RPARENT*
+    ;
+
+literal
+    : TRUE | FALSE | WORD | REALNUMBER | STRING | variable | methodCall
     ;
 
 prefixOperator
@@ -93,11 +101,13 @@ postfixOperator
     ;
 
 expressionWithReturnValue
-    : (variable | WORD | REALNUMBER | methodCall | STRING)
+    : LPARENT* (variable | WORD | REALNUMBER | methodCall | STRING | binaryOperator) RPARENT*
     ;
 
 binaryOperator
-    : (variable | WORD | REALNUMBER | methodCall | STRING) (PLUS | MINUS | STAR | MOD | DIV | EQUAL | NOTEQUAL | LESS | LESSEQUAL | GREATER | GREATEREQUAL) expressionWithReturnValue
+    : literal (STAR | MOD | DIV) (literal | binaryOperator)
+    | literal (PLUS | MINUS)  (literal | binaryOperator)
+    | literal (EQUAL | NOTEQUAL | LESS | LESSEQUAL | GREATER | GREATEREQUAL) (literal | binaryOperator)
     ;
 
 specialAssign
@@ -121,7 +131,7 @@ andandoror
     ;
 
 TYPE
-    : 'float' | 'string' | 'bool' | 'int' | 'void'
+    : 'float' | 'string' | 'bool' | 'int' | 'void' | 'float2'
     ;
 
 REALNUMBER
@@ -264,11 +274,12 @@ RETURN
     : 'return'
     ;
 
-WS	: 	(' '| '\t' | '\n' | '\r') -> skip
-	;
+WS
+    : (' '| '\t' | '\n' | '\r') -> skip
+    ;
 
 WORD
-    : LETTER (LETTER | REALNUMBER)*
+    : LETTER (LETTER | REALNUMBER | '_' | '.')*
     ;
 
 fragment LETTER

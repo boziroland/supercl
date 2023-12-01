@@ -21,6 +21,8 @@ class StatementListNode(
                 ret += " ".repeat(tabCounter * 4) + WhileNode(this, statement.while_(), tabCounter + 1).toCode()
             } else if (statement.declaration() != null) {
                 ret += " ".repeat(tabCounter * 4) + DeclarationNode(this, statement.declaration(), tabCounter).toCode()
+            } else if (statement.returnExpression() != null) {
+                ret += " ".repeat(tabCounter * 4) + ReturnExpressionNode(this, statement.returnExpression(), tabCounter).toCode()
             }
         }
         return ret

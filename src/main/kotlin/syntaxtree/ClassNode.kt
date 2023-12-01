@@ -5,7 +5,6 @@ import symboltable.ClassSymbol
 import symboltable.MethodSymbol
 import symboltable.Scope
 import symboltable.Symbol
-import typesystem.TSType
 
 class ClassNode(
     parent: SyntaxTreeNode?,
@@ -29,6 +28,8 @@ class ClassNode(
         vars.forEachIndexed { index, variable ->
             classProperties.add(Variable(classContext.typeName(index).text, variable.text))
         }
+
+        ret += createVariables(className)
 
         if (parentClassName.isNotEmpty()) {
             val parentClass = getClass(parentClassName, globalScope) as ClassSymbol
@@ -133,8 +134,16 @@ class ClassNode(
         return ret
     }
 
-    fun fillParentMethodBodies(parentClassNode: ClassNode) {
+    private fun createVariables(className: String): String {
+        var ret = " ".repeat((tabCounter) * 4) + "typedef struct $className {\n"
 
+        for (classProperty in classProperties) {
+            ret += " ".repeat((tabCounter + 1) * 4) + "${classProperty.type} ${classProperty.name};\n"
+        }
+
+        ret += " ".repeat((tabCounter) * 4) + "} $className;\n"
+
+        return ret
     }
 
 }

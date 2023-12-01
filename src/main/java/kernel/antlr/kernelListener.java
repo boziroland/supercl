@@ -138,6 +138,16 @@ public interface kernelListener extends ParseTreeListener {
 	 */
 	void exitBlock(kernelParser.BlockContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link kernelParser#returnExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterReturnExpression(kernelParser.ReturnExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link kernelParser#returnExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitReturnExpression(kernelParser.ReturnExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link kernelParser#methodBody}.
 	 * @param ctx the parse tree
 	 */
@@ -207,6 +217,16 @@ public interface kernelListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpression(kernelParser.ExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link kernelParser#literal}.
+	 * @param ctx the parse tree
+	 */
+	void enterLiteral(kernelParser.LiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link kernelParser#literal}.
+	 * @param ctx the parse tree
+	 */
+	void exitLiteral(kernelParser.LiteralContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link kernelParser#prefixOperator}.
 	 * @param ctx the parse tree

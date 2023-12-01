@@ -89,6 +89,12 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBlock(kernelParser.BlockContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link kernelParser#returnExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReturnExpression(kernelParser.ReturnExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link kernelParser#methodBody}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -130,6 +136,12 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExpression(kernelParser.ExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link kernelParser#literal}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLiteral(kernelParser.LiteralContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link kernelParser#prefixOperator}.
 	 * @param ctx the parse tree

@@ -1,6 +1,7 @@
 package syntaxtree
 
 import kernel.antlr.kernelParser
+import org.stringtemplate.v4.ST
 
 class ParameterNode(
     parent: SyntaxTreeNode?,
@@ -8,15 +9,12 @@ class ParameterNode(
 ) : SyntaxTreeNode(parent) {
 
     override fun toCode(): String {
-        var ret = ""
+        val ret = ST("<memoryQualifier> <type> <variableName>")
+        ret.add("memoryQualifier", parameterCtx.MEMORY_QUALIFIER()?.text ?: "")
+        ret.add("type", parameterCtx.typeName().text)
+        ret.add("variableName", parameterCtx.WORD().text)
 
-        ret += parameterCtx.MEMORY_QUALIFIER()?.text ?: ""
-        ret += " "
-        ret += parameterCtx.typeName().text
-        ret += " "
-        ret += parameterCtx.WORD().text
-
-        return ret
+        return ret.render()
     }
 
 }

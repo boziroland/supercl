@@ -12,7 +12,7 @@ class ForNode(
 
     override fun toCode(): String {
         val loopVarType = forContext.declaration()?.typeName()?.text!!
-        val loopVar = forContext.declaration()?.variable(0)?.text!!
+        val loopVar = forContext.declaration()?.variable()?.text!!
         val loopStart = forContext.declaration()?.children?.get(3)?.text!! // ugly ugly super ugly
         val loopEnd = ExpressionNode(this, forContext.expression(0)) // only single end condition TODO
         val loopIncrement = forContext.expression(1)?.children?.last()?.text!!

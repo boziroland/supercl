@@ -1,6 +1,7 @@
 package syntaxtree
 
 import kernel.antlr.kernelParser.IfContext
+import org.stringtemplate.v4.ST
 
 class IfNode(
     parent: SyntaxTreeNode?,
@@ -10,6 +11,7 @@ class IfNode(
 
     override fun toCode(): String {
         var ret = ""
+        val code = ST("if (<expression>) {\n <statementList>l }")
 
         val expression = ExpressionNode(this, ifContext.expression())
         ret += "if ("

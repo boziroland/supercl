@@ -14,18 +14,18 @@ class DeclarationNode (
         ret += if (ret.isBlank()) "" else " "
         ret += declarationCtx.typeName().TYPE()?.text ?: declarationCtx.typeName().WORD().text
         ret += " "
-        ret += declarationCtx.variable(0).text
+        ret += declarationCtx.variable().text
         ret += " "
         ret += declarationCtx.ASSIGN()?.text ?: ""
         ret += " "
         ret += declarationCtx.cast()?.text ?: ""
         when {
-            declarationCtx.WORD() != null -> ret += declarationCtx.WORD().text
-            declarationCtx.REALNUMBER() != null -> ret += declarationCtx.REALNUMBER()
-            declarationCtx.methodCall() != null -> ret += declarationCtx.methodCall().text // TODO potentially
-            declarationCtx.STRING() != null -> ret += declarationCtx.STRING()
+            declarationCtx.expression().literal().WORD() != null -> ret += declarationCtx.expression().literal().WORD().text
+            declarationCtx.expression().literal().REALNUMBER() != null -> ret += declarationCtx.expression().literal().REALNUMBER()
+            declarationCtx.expression().literal().methodCall() != null -> ret += declarationCtx.expression().literal().methodCall().text // TODO potentially
+            declarationCtx.expression().literal().STRING() != null -> ret += declarationCtx.expression().literal().STRING()
             declarationCtx.expression() != null -> ret += ExpressionNode(this, declarationCtx.expression()).toCode()
-            else -> ret += declarationCtx.variable(1).text
+            else -> ret += declarationCtx.expression().literal().variable().text
         }
         ret += ";\n"
         return ret

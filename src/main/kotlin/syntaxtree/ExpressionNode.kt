@@ -20,8 +20,10 @@ class ExpressionNode(
             ) "++" else "--"
         } else if (expression?.binaryOperator() != null) {
             ret = expression.binaryOperator().text!! // TODO
-        } else if (expression?.TRUE() != null) {
+        } else if (expression?.literal()?.TRUE() != null) {
             ret = "true"
+        } else if (expression?.literal()?.FALSE() != null) {
+            ret = "false"
         }
 
         expression?.expression()!!.forEachIndexed { index, expr ->

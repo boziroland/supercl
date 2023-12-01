@@ -1,11 +1,16 @@
 package typesystem
 
+import kernel.antlr.kernelParser
 import symboltable.Scope
 
 class ExpressionTypeChecker(
     val typeSystem: TypeSystem
 ) {
     private val typePrecedence = listOf("float", "int")
+
+    fun getExpressionType(currentScope: Scope, expression: kernelParser.ExpressionContext) {
+
+    }
 
     fun getReturnType(currentScope: Scope, rhs: String?, lhs: String?): String {
 

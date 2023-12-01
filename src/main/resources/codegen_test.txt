@@ -1,46 +1,9 @@
-__kernel testBasicMethod1() {}
-__kernel testBasicMethod2(int test) {}
-__kernel testBasicMethod3(int test1, int test2) {
-    for(int i = 0; i < 10; i++){
-        int k = 0;
-    }
-
-    while (test2 < 10){}
-    int z = 1;
-    int h = 5;
-
-    if (z < 0) {
-
-    } else if (z > 4) {
-
-    } else if (z < 4 && h >= 5) {
-        if (z == 3) {
-
-        }
-    } else {
-
-    }
-}
-
-int testBasicMethod4(__global int test1, int test2) { return 4; }
-
-class MyParentClass {
-    int parentProperty;
-
-    void parentMemberFunction(int test1){int k = 4;}
-}
-
-class MyChildClass extends MyParentClass{
-    int childProperty;
-    void childMemberFunction(int test1){
-        while (true) {
-            for(int i = 0; i < 10; i++){
-                if (test1 == 3) {k = 0}
-                else if (test1 < 2 ) {
-                    if (test1 == 0) { k = 1}
-                    else if (test1 == 1) { k = 2}
-                }
-            }
-        }
+float poly6_kernel(float2 vec, float h){
+    float dist_sq = vec.x * vec.x + vec.y * vec.y;
+    float h_sq = h * h;
+    if(h_sq < dist_sq || dist_sq < 0.0){
+        return 0.0;
+    }else{
+        return 315.0 / 64.0 * h_sq - dist_sq * h_sq - dist_sq * h_sq - dist_sq;
     }
 }
