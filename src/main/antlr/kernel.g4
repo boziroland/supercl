@@ -57,7 +57,7 @@ block
     ;
 
 returnExpression
-    : RETURN expressionWithReturnValue SEMI
+    : RETURN expression SEMI
     ;
 
 methodBody
@@ -93,11 +93,11 @@ literal
     ;
 
 prefixOperator
-    : (PLUSPLUS | MINUSMINUS) (WORD | variable)
+    : (PLUSPLUS | MINUSMINUS) variable
     ;
 
 postfixOperator
-    : (WORD | variable) (PLUSPLUS | MINUSMINUS)
+    : variable (PLUSPLUS | MINUSMINUS)
     ;
 
 expressionWithReturnValue

@@ -20,10 +20,10 @@ class DeclarationNode (
         ret += " "
         ret += declarationCtx.cast()?.text ?: ""
         when {
-            declarationCtx.expression().literal().WORD() != null -> ret += declarationCtx.expression().literal().WORD().text
-            declarationCtx.expression().literal().REALNUMBER() != null -> ret += declarationCtx.expression().literal().REALNUMBER()
-            declarationCtx.expression().literal().methodCall() != null -> ret += declarationCtx.expression().literal().methodCall().text // TODO potentially
-            declarationCtx.expression().literal().STRING() != null -> ret += declarationCtx.expression().literal().STRING()
+            declarationCtx.expression().literal()?.WORD() != null -> ret += declarationCtx.expression().literal().WORD().text
+            declarationCtx.expression().literal()?.REALNUMBER() != null -> ret += declarationCtx.expression().literal().REALNUMBER()
+            declarationCtx.expression().literal()?.methodCall() != null -> ret += declarationCtx.expression().literal().methodCall().text // TODO potentially
+            declarationCtx.expression().literal()?.STRING() != null -> ret += declarationCtx.expression().literal().STRING()
             declarationCtx.expression() != null -> ret += ExpressionNode(this, declarationCtx.expression()).toCode()
             else -> ret += declarationCtx.expression().literal().variable().text
         }

@@ -11,19 +11,21 @@ class ExpressionNode(
     override fun toCode(): String {
         var ret = ""
         if (expression?.prefixOperator() != null) {
-            ret =
+            ret +=
                 if (expression.prefixOperator().PLUSPLUS() != null) "++" else "--" + expression.prefixOperator()
                     .variable().text!!
         } else if (expression?.postfixOperator() != null) {
-            ret = expression.postfixOperator().variable().text!! + if (expression.postfixOperator()
+            ret += expression.postfixOperator().variable().text!! + if (expression.postfixOperator()
                     .PLUSPLUS() != null
             ) "++" else "--"
         } else if (expression?.binaryOperator() != null) {
-            ret = expression.binaryOperator().text!! // TODO
+            ret += expression.binaryOperator().text!!
         } else if (expression?.literal()?.TRUE() != null) {
-            ret = "true"
+            ret += "true"
         } else if (expression?.literal()?.FALSE() != null) {
-            ret = "false"
+            ret += "false"
+        } else if (expression?.literal()?.REALNUMBER() != null) {
+            ret += expression.literal()?.REALNUMBER()
         }
 
         expression?.expression()!!.forEachIndexed { index, expr ->

@@ -155,15 +155,16 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
             var type = ctx?.typeName()?.text ?: ctx?.variable()?.text
             val varName = ctx?.variable()?.text
             var rhs: kernelParser.ExpressionContext? = ctx?.expression()
-            val rhsType = getType(rhs!!).type
+            var rhsStr = ctx?.expression()?.text!!
+            var rhsType = getType(rhs!!).type
             if (rhsType == typeSystem.types["ErrorType"]!!.type) {
-                rhsType = expressionTypeChecker.getReturnType(currentScope, rhs)
+                rhsType = expressionTypeChecker.getExpressionType(currentScope, rhs).type
             }
             if (cast) {
                 if (expressionTypeChecker.isClass(rhsType)) {
                     currentScope[varName!!] = Symbol(varName, TSType(rhsType))
                 } else {
-                    rhs = expressionTypeChecker.valueConverter(rhs, ctx?.cast()?.text!!, rhsType)
+                    rhsStr = expressionTypeChecker.valueConverter(rhsStr, ctx?.cast()?.text!!, rhsType)
                 }
             }
 
@@ -172,7 +173,7 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
             }
 
             if (ctx?.expression() != null) {
-                currentScope[rhs!!] = Symbol(rhs, TSType(type!!))
+                currentScope[rhsStr!!] = Symbol(rhsStr, TSType(type!!))
             }
 
             if (isBuiltInType) {
@@ -184,7 +185,7 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
                     errors.add(
                         MyError(
                             "Variable on right side of assignment to ${varName} is of incorrect type! (type ${
-                                getType(
+                                getTypeOfVariable(
                                     varName!!
                                 ).type
                             })", ctx.start.line, ctx.start.charPositionInLine
@@ -196,7 +197,7 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
                     errors.add(
                         MyError(
                             "Variable on right side of assignment to ${varName} is of incorrect type! (type ${
-                                getType(
+                                getTypeOfVariable(
                                     varName!!
                                 ).type
                             })", ctx.start.line, ctx.start.charPositionInLine
@@ -264,8 +265,8 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
 
     fun isCorrectType(lhs: String, rhs: String): Boolean {
 
-        val lhsType = getType(lhs);
-        val rhsType = getType(rhs);
+        val lhsType = getTypeOfVariable(lhs);
+        val rhsType = getTypeOfVariable(rhs);
 
         return lhsType.type == rhsType.type || rhsType.parents.map { it.type }.contains(lhsType.type)
     }
@@ -292,23 +293,34 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
         return false
     }
 
+    fun getTypeOfVariable(variable: String): TSType {
+        var currScope : Scope? = currentScope
+        while (currScope != null) {
+            if (currScope.keys.contains(variable)) {
+                return currScope[variable]?.type!!
+            }
+            currScope = currScope.parent
+        }
+        return typeSystem.types["ErrorType"]!!
+    }
+
     fun getType(variable: kernelParser.ExpressionContext): TSType {
 
         if (variable.literal()?.REALNUMBER() != null) {
             if (variable.literal().REALNUMBER().text.contains("."))
                 return typeSystem.types["float"]!!
             return typeSystem.types["int"]!!
-        }else if (variable.literal().text.contains(".x") || variable.literal().text.contains(".y")) {
+        }else if (variable.literal()?.text?.contains(".x") == true || variable.literal()?.text?.contains(".y") == true) {
             return typeSystem.types["float2"]!!
-        } else if (variable.literal().STRING() != null) {
+        } else if (variable.literal()?.STRING() != null) {
             return typeSystem.types["string"]!!
-        } else if (variable.literal().TRUE() != null || variable.literal().FALSE() != null) {
+        } else if (variable.literal()?.TRUE() != null || variable.literal()?.FALSE() != null) {
             return typeSystem.types["bool"]!!
         }
 
         var currScope : Scope? = currentScope
         while (currScope != null) {
-            if (currScope.keys.contains(variable.literal().variable().text)) {
+            if (currScope.keys.contains(variable.literal()?.variable()?.text)) {
                 return currScope[variable.literal().variable().text]?.type!!
             }
             currScope = currScope.parent
