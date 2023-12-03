@@ -26,7 +26,7 @@ class ExpressionTypeChecker(
         return determineResultType(types)
     }
 
-    private fun getBinaryOperatorType(currentScope: Scope, binaryOperator: kernelParser.BinaryOperatorContext): TSType {
+    fun getBinaryOperatorType(currentScope: Scope, binaryOperator: kernelParser.BinaryOperatorContext): TSType {
         val types = mutableListOf<TSType>()
 
         types.add(getType(currentScope, binaryOperator.literal(0).text))

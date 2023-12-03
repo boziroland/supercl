@@ -38,7 +38,9 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
 
         currentScope = Scope(parent = currentScope, name = name!!)
         vars!!.forEach { e -> currentScope[name] = Symbol(e.text, TSType(name)) }
-        methods!!.forEach { m -> currentScope[name] = Symbol(m.text, TSType(m.methodHeader().typeName().text?: "void")) }
+        methods!!.forEach { m ->
+            currentScope[name] = Symbol(m.text, TSType(m.methodHeader().typeName().text ?: "void"))
+        }
 
         super.visitClass(ctx).also {
             currentScope = currentScope.parent!!
@@ -91,38 +93,44 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
 
     override fun visitAssignment(ctx: kernelParser.AssignmentContext?) {
 
-    if (ctx?.variable()?.size == 2)
-    {
-        if (!isCorrectType(ctx?.variable(0)?.text!!, ctx?.variable(0)?.text!!))
-        {
-            errors.add(MyError("Variable on right side of assignment is of incorrect type!", ctx.start.line, ctx.start.charPositionInLine))
-        }
-    }
-    else if (ctx?.methodCall() != null) {
-        if (!isCorrectType(ctx.variable()[0].text!!, ctx?.variable(0)?.text!!)) {
-            errors.add(
-                MyError(
-                    "Method on right side of assignment has incorrect return value!",
-                    ctx.start.line,
-                    ctx.start.charPositionInLine
+        if (ctx?.variable()?.size == 2) {
+            if (!isCorrectType(ctx?.variable(0)?.text!!, ctx?.variable(0)?.text!!)) {
+                errors.add(
+                    MyError(
+                        "Variable on right side of assignment is of incorrect type!",
+                        ctx.start.line,
+                        ctx.start.charPositionInLine
+                    )
                 )
-            )
-        }
-    }
-    else if (ctx?.expression() != null) {
-        if (!isCorrectType(ctx.variable()[0].text!!, (ctx.expression()!!.children[0] as ParserRuleContext).children[0].text)) {
-            errors.add(
-                MyError(
-                    "Expression on right side of assignment has incorrect type!",
-                    ctx.start.line,
-                    ctx.start.charPositionInLine
+            }
+        } else if (ctx?.methodCall() != null) {
+            if (!isCorrectType(ctx.variable()[0].text!!, ctx?.variable(0)?.text!!)) {
+                errors.add(
+                    MyError(
+                        "Method on right side of assignment has incorrect return value!",
+                        ctx.start.line,
+                        ctx.start.charPositionInLine
+                    )
                 )
-            )
+            }
+        } else if (ctx?.expression() != null) {
+            if (!isCorrectType(
+                    ctx.variable()[0].text!!,
+                    (ctx.expression()!!.children[0] as ParserRuleContext).children[0].text
+                )
+            ) {
+                errors.add(
+                    MyError(
+                        "Expression on right side of assignment has incorrect type!",
+                        ctx.start.line,
+                        ctx.start.charPositionInLine
+                    )
+                )
+            }
         }
-    }
 
-    super.visitAssignment(ctx)
-}
+        super.visitAssignment(ctx)
+    }
 
     override fun visitFor(ctx: kernelParser.ForContext?): Any {
         val loopVar = ctx?.declaration()?.variable()?.text
@@ -229,7 +237,13 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
         val params = ctx.children.subList(2, ctx.children.size).filterIndexed { i, _ -> i % 2 == 0 }
         params.forEach {
             if (!isInScope(it.text)) {
-                errors.add(MyError("Variable ${it.text} not in scope when calling method ${methodName}!", ctx.start.line, ctx.start.charPositionInLine))
+                errors.add(
+                    MyError(
+                        "Variable ${it.text} not in scope when calling method ${methodName}!",
+                        ctx.start.line,
+                        ctx.start.charPositionInLine
+                    )
+                )
             }
         }
 
@@ -242,16 +256,19 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
 
 
     override fun visitBinaryOperator(ctx: kernelParser.BinaryOperatorContext?) {
-        val rhs = ctx?.children?.get(0)?.text
-        val lhs = ctx?.children?.get(2)?.text
-
-        try {
-            expressionTypeChecker.getReturnType(currentScope, rhs, lhs)
-        } catch (e: RuntimeException) {
-            errors.add(MyError(e.localizedMessage, ctx?.start?.line!!, ctx.start?.charPositionInLine!!))
+        if (expressionTypeChecker.getBinaryOperatorType(
+                currentScope,
+                ctx!!
+            ).type == typeSystem.types["ErrorType"]!!.type
+        ) {
+            errors.add(
+                MyError(
+                    "The types on the 2 sides of the expression are not the same!",
+                    ctx.start?.line!!,
+                    ctx.start?.charPositionInLine!!
+                )
+            )
         }
-
-        super.visitBinaryOperator(ctx)
     }
 
     fun isCorrectType(lhs: TSType, rhs: String): Boolean {
@@ -276,7 +293,7 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
             return true
         }
 
-        var currScope : Scope? = currentScope
+        var currScope: Scope? = currentScope
         var lastDot = variable.lastIndexOf('.')
 //        var actualVariable = if (lastDot == -1) variable else variable.substring(lastDot + 1)
 //        var mainVariable = if (lastDot == -1) variable else variable.substring(0, lastDot)
@@ -294,7 +311,7 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
     }
 
     fun getTypeOfVariable(variable: String): TSType {
-        var currScope : Scope? = currentScope
+        var currScope: Scope? = currentScope
         while (currScope != null) {
             if (currScope.keys.contains(variable)) {
                 return currScope[variable]?.type!!
@@ -310,7 +327,7 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
             if (variable.literal().REALNUMBER().text.contains("."))
                 return typeSystem.types["float"]!!
             return typeSystem.types["int"]!!
-        }else if (variable.literal()?.text?.contains(".x") == true || variable.literal()?.text?.contains(".y") == true) {
+        } else if (variable.literal()?.text?.contains(".x") == true || variable.literal()?.text?.contains(".y") == true) {
             return typeSystem.types["float2"]!!
         } else if (variable.literal()?.STRING() != null) {
             return typeSystem.types["string"]!!
@@ -318,7 +335,7 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
             return typeSystem.types["bool"]!!
         }
 
-        var currScope : Scope? = currentScope
+        var currScope: Scope? = currentScope
         while (currScope != null) {
             if (currScope.keys.contains(variable.literal()?.variable()?.text)) {
                 return currScope[variable.literal().variable().text]?.type!!
