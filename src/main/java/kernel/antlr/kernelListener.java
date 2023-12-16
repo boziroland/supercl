@@ -158,25 +158,15 @@ public interface kernelListener extends ParseTreeListener {
 	 */
 	void exitMethodBody(kernelParser.MethodBodyContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link kernelParser#singleLineComment}.
+	 * Enter a parse tree produced by {@link kernelParser#methodCallParameter}.
 	 * @param ctx the parse tree
 	 */
-	void enterSingleLineComment(kernelParser.SingleLineCommentContext ctx);
+	void enterMethodCallParameter(kernelParser.MethodCallParameterContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link kernelParser#singleLineComment}.
+	 * Exit a parse tree produced by {@link kernelParser#methodCallParameter}.
 	 * @param ctx the parse tree
 	 */
-	void exitSingleLineComment(kernelParser.SingleLineCommentContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link kernelParser#multiLineComment}.
-	 * @param ctx the parse tree
-	 */
-	void enterMultiLineComment(kernelParser.MultiLineCommentContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link kernelParser#multiLineComment}.
-	 * @param ctx the parse tree
-	 */
-	void exitMultiLineComment(kernelParser.MultiLineCommentContext ctx);
+	void exitMethodCallParameter(kernelParser.MethodCallParameterContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link kernelParser#methodCall}.
 	 * @param ctx the parse tree
@@ -308,13 +298,23 @@ public interface kernelListener extends ParseTreeListener {
 	 */
 	void exitCast(kernelParser.CastContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link kernelParser#andandoror}.
+	 * Enter a parse tree produced by {@link kernelParser#realNumberVec2D}.
 	 * @param ctx the parse tree
 	 */
-	void enterAndandoror(kernelParser.AndandororContext ctx);
+	void enterRealNumberVec2D(kernelParser.RealNumberVec2DContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link kernelParser#andandoror}.
+	 * Exit a parse tree produced by {@link kernelParser#realNumberVec2D}.
 	 * @param ctx the parse tree
 	 */
-	void exitAndandoror(kernelParser.AndandororContext ctx);
+	void exitRealNumberVec2D(kernelParser.RealNumberVec2DContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link kernelParser#realNumberVec3D}.
+	 * @param ctx the parse tree
+	 */
+	void enterRealNumberVec3D(kernelParser.RealNumberVec3DContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link kernelParser#realNumberVec3D}.
+	 * @param ctx the parse tree
+	 */
+	void exitRealNumberVec3D(kernelParser.RealNumberVec3DContext ctx);
 }

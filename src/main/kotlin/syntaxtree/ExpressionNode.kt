@@ -4,7 +4,8 @@ import kernel.antlr.kernelParser
 
 class ExpressionNode(
     parent: SyntaxTreeNode?,
-    private val expression: kernelParser.ExpressionContext?
+    private val expression: kernelParser.ExpressionContext?,
+    private val kernels: MutableList<MethodNode>? = null,
 ) : SyntaxTreeNode(parent) {
 
 
@@ -26,11 +27,13 @@ class ExpressionNode(
             ret += "false"
         } else if (expression?.literal()?.REALNUMBER() != null) {
             ret += expression.literal()?.REALNUMBER()
+        } else if (expression?.literal()?.methodCall() != null) {
+            ret += MethodCallNode(this, kernels, expression.literal().methodCall()).toCode()
         }
 
         expression?.expression()!!.forEachIndexed { index, expr ->
             ret += " "
-            ret += expression.andandoror(index).text
+            ret += expression.CONNECTIVE(index).text
             ret += " "
             ret += ExpressionNode(this, expr).toCode()
         }

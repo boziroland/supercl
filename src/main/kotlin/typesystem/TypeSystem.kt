@@ -6,7 +6,10 @@ class TypeSystem {
         Pair("int", TSType("int")),
         Pair("bool", TSType("bool")),
         Pair("float", TSType("float")),
+        Pair("int2", TSType("int2")),
+        Pair("int3", TSType("int3")),
         Pair("float2", TSType("float2")),
+        Pair("float3", TSType("float3")),
         Pair("string", TSType("string")),
         Pair("ErrorType", TSType("ErrorType")),
         Pair("NullType", TSType("NullType"))

@@ -122,14 +122,7 @@ public class kernelBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSingleLineComment(kernelParser.SingleLineCommentContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitMultiLineComment(kernelParser.MultiLineCommentContext ctx) { return visitChildren(ctx); }
+	@Override public T visitMethodCallParameter(kernelParser.MethodCallParameterContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -227,5 +220,12 @@ public class kernelBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitAndandoror(kernelParser.AndandororContext ctx) { return visitChildren(ctx); }
+	@Override public T visitRealNumberVec2D(kernelParser.RealNumberVec2DContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitRealNumberVec3D(kernelParser.RealNumberVec3DContext ctx) { return visitChildren(ctx); }
 }

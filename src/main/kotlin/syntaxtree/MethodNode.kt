@@ -4,9 +4,11 @@ import kernel.antlr.kernelParser
 
 class MethodNode(
     parent: SyntaxTreeNode?,
-    private val methodHeaderCtx: kernelParser.MethodHeaderContext,
+    private val kernels: MutableList<MethodNode>?,
+    val methodHeaderCtx: kernelParser.MethodHeaderContext,
     private val methodBodyCtx: kernelParser.MethodBodyContext,
-    private var tabCounter: Int
+    private var tabCounter: Int,
+    private val isKernel: Boolean
 ) : SyntaxTreeNode(parent) {
 
     override fun toCode(): String {
@@ -18,14 +20,14 @@ class MethodNode(
         ret += " ("
         var params = ""
         for (param in methodHeaderCtx.parameter()) {
-            params += ParameterNode(this, param).toCode() + ","
+            params += ParameterNode(this, param, isKernel).toCode() + ","
         }
         if (params.isNotBlank()) {
             ret += params.substring(0, params.length - 1)
         }
         ret += ") "
 
-        val statements = MethodBodyNode(this, methodBodyCtx, tabCounter)
+        val statements = MethodBodyNode(this, methodBodyCtx, kernels, tabCounter)
         ret += statements.toCode()
 
         return ret

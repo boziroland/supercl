@@ -196,25 +196,13 @@ public class kernelBaseListener implements kernelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSingleLineComment(kernelParser.SingleLineCommentContext ctx) { }
+	@Override public void enterMethodCallParameter(kernelParser.MethodCallParameterContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSingleLineComment(kernelParser.SingleLineCommentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterMultiLineComment(kernelParser.MultiLineCommentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitMultiLineComment(kernelParser.MultiLineCommentContext ctx) { }
+	@Override public void exitMethodCallParameter(kernelParser.MethodCallParameterContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -376,13 +364,25 @@ public class kernelBaseListener implements kernelListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAndandoror(kernelParser.AndandororContext ctx) { }
+	@Override public void enterRealNumberVec2D(kernelParser.RealNumberVec2DContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAndandoror(kernelParser.AndandororContext ctx) { }
+	@Override public void exitRealNumberVec2D(kernelParser.RealNumberVec2DContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRealNumberVec3D(kernelParser.RealNumberVec3DContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRealNumberVec3D(kernelParser.RealNumberVec3DContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

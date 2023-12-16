@@ -5,6 +5,7 @@ import kernel.antlr.kernelParser
 class MethodBodyNode(
     parent: SyntaxTreeNode?,
     private val methodBodyCtx: kernelParser.MethodBodyContext,
+    private val kernels: MutableList<MethodNode>?,
     private var tabCounter: Int
 ) : SyntaxTreeNode(parent) {
 
@@ -12,7 +13,7 @@ class MethodBodyNode(
         var ret = ""
 
         ret += "{\n"
-        val statements = StatementListNode(this, methodBodyCtx.statementList(), tabCounter + 1)
+        val statements = StatementListNode(this, methodBodyCtx.statementList(), kernels, tabCounter + 1)
         ret += statements.toCode()
 
         ret += "}\n"

@@ -6,6 +6,7 @@ import org.stringtemplate.v4.ST
 class ForNode(
     parent: SyntaxTreeNode?,
     private val forContext: ForContext,
+    private val kernels: MutableList<MethodNode>?,
     private var tabCounter: Int
 ) : SyntaxTreeNode(parent) {
 
@@ -16,7 +17,7 @@ class ForNode(
         val loopStart = forContext.declaration()?.children?.get(3)?.text!! // ugly ugly super ugly
         val loopEnd = ExpressionNode(this, forContext.expression(0)) // only single end condition TODO
         val loopIncrement = forContext.expression(1)?.children?.last()?.text!!
-        val statements = StatementListNode(this, forContext.block().statementList(), tabCounter)
+        val statements = StatementListNode(this, forContext.block().statementList(), kernels, tabCounter)
 
         val code = ST("for (<loopVarType> <loopVar> = <loopStart>; <loopEnd>; <loopIncrement>) " +
                 "{\n" +

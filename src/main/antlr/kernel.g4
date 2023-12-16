@@ -1,9 +1,5 @@
 grammar kernel;
 
-//options {
-//    tokenVocab = 'KernelLexer';
-//}
-
 program
     :   statementList
     ;
@@ -13,11 +9,11 @@ statementList
     ;
 
 statement
-    : if | for | while | methodHeader | method | declaration | methodCall | singleLineComment | multiLineComment | class | prefixOperator | postfixOperator | assignment | returnExpression
+    : if | for | while | methodHeader | method | declaration | methodCall | MULTILINECOMMENT | SINGLELINECOMMENT | class | prefixOperator | postfixOperator | assignment | returnExpression
     ;
 
 for
-    : FOR LPARENT declaration expression SEMI expression RPARENT block
+    : FOR LPARENT declaration SEMI expression SEMI expression RPARENT block
     ;
 
 className
@@ -25,7 +21,7 @@ className
     ;
 
 class
-    : CLASS className (EXTENDS className)? BLOCKBEGIN ((typeName WORD SEMI) | method)+ BLOCKEND
+    : CLASS className (EXTENDS className)? BLOCKBEGIN ((typeName WORD) | method)+ BLOCKEND
     ;
 
 parameter
@@ -57,27 +53,23 @@ block
     ;
 
 returnExpression
-    : RETURN expression SEMI
+    : RETURN expression
     ;
 
 methodBody
     : BLOCKBEGIN statementList BLOCKEND
     ;
 
-singleLineComment
-    : INLINECOMMENT WORD*
-    ;
-
-multiLineComment
-    : BLOCKCOMMENTSTART WORD* BLOCKCOMMENTEND
+methodCallParameter
+    : realNumberVec2D | realNumberVec3D | REALNUMBER | STRING | methodCall | variable
     ;
 
 methodCall
-    : WORD LPARENT (WORD | REALNUMBER | STRING | methodCall | variable) (',' (WORD | REALNUMBER | STRING | methodCall | variable))* RPARENT
+    : WORD LPARENT (methodCallParameter)? (COMMA methodCallParameter)* RPARENT
     ;
 
 declaration
-    : MEMORY_QUALIFIER? typeName variable (ASSIGN cast? LPARENT* expression RPARENT*)? SEMI
+    : MEMORY_QUALIFIER? typeName variable (ASSIGN cast? LPARENT* expression RPARENT*)?
     ;
 
 assignment
@@ -85,7 +77,7 @@ assignment
     ;
 
 expression
-    : LPARENT* (prefixOperator | postfixOperator | binaryOperator | literal) ((andandoror) expression)* RPARENT*
+    : LPARENT* (prefixOperator | postfixOperator | binaryOperator | literal) (CONNECTIVE expression)* RPARENT*
     ;
 
 literal
@@ -115,23 +107,40 @@ specialAssign
     ;
 
 variable
-    : WORD ('.' (WORD | methodCall))*
+    : WORD ('.' (WORD | methodCall))* (LEFTBRACKET (REALNUMBER | WORD) RIGHTBRACKET)?
     ;
 
 typeName
-    : TYPE | WORD
+    : (TYPE | WORD) (LEFTBRACKET REALNUMBER RIGHTBRACKET)?
     ;
 
 cast
     : LPARENT (TYPE | className) RPARENT
     ;
 
-andandoror
-    : (ANDAND | OROR)
+
+realNumberVec2D
+    : LPARENT REALNUMBER COMMA REALNUMBER RPARENT
+    ;
+
+realNumberVec3D
+    : LPARENT REALNUMBER COMMA REALNUMBER COMMA REALNUMBER RPARENT
+    ;
+
+SINGLELINECOMMENT
+    : INLINECOMMENT WORD* -> channel(HIDDEN)
+    ;
+
+MULTILINECOMMENT
+    : BLOCKCOMMENTSTART WORD* BLOCKCOMMENTEND -> channel(HIDDEN)
+    ;
+
+CONNECTIVE
+    : (CONJUNCTION | DISJUNCTION)
     ;
 
 TYPE
-    : 'float' | 'string' | 'bool' | 'int' | 'void' | 'float2'
+    : 'float' | 'string' | 'bool' | 'int' | 'void' | 'float2' | 'float3' | 'int2' | 'int3'
     ;
 
 REALNUMBER
@@ -192,8 +201,8 @@ MOD : '%';
 
 AND : '&';
 OR : '|';
-ANDAND : '&&';
-OROR : '||';
+CONJUNCTION : '&&';
+DISJUNCTION : '||';
 CARET : '^';
 NOT : '!';
 TILDE : '~';

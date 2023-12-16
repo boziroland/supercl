@@ -101,17 +101,11 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMethodBody(kernelParser.MethodBodyContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link kernelParser#singleLineComment}.
+	 * Visit a parse tree produced by {@link kernelParser#methodCallParameter}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSingleLineComment(kernelParser.SingleLineCommentContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link kernelParser#multiLineComment}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMultiLineComment(kernelParser.MultiLineCommentContext ctx);
+	T visitMethodCallParameter(kernelParser.MethodCallParameterContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link kernelParser#methodCall}.
 	 * @param ctx the parse tree
@@ -191,9 +185,15 @@ public interface kernelVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCast(kernelParser.CastContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link kernelParser#andandoror}.
+	 * Visit a parse tree produced by {@link kernelParser#realNumberVec2D}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAndandoror(kernelParser.AndandororContext ctx);
+	T visitRealNumberVec2D(kernelParser.RealNumberVec2DContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link kernelParser#realNumberVec3D}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRealNumberVec3D(kernelParser.RealNumberVec3DContext ctx);
 }

@@ -4,7 +4,6 @@ import Errors
 import MyError
 import kernel.antlr.kernelBaseVisitor
 import kernel.antlr.kernelParser
-import org.antlr.v4.runtime.ParserRuleContext
 import org.apache.commons.lang3.StringUtils
 import symboltable.ClassSymbol
 import symboltable.MethodSymbol
@@ -20,10 +19,11 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
     val globalScope = Scope(parent = null, name = "GLOBAL")
     val errors = Errors()
     val typeSystem = TypeSystem()
-    var expressionTypeChecker = ExpressionTypeChecker(typeSystem)
+    var expressionTypeChecker = ExpressionTypeChecker(typeSystem, errors)
 
     override fun visitProgram(ctx: kernelParser.ProgramContext?) {
         globalScope["print"] = MethodSymbol("void", "print", TSType("void"))
+        globalScope["initOpenCL"] = MethodSymbol("void", "initOpenCL", TSType("void"))
         super.visitProgram(ctx)
 
         print(errors.getErrors())
@@ -40,19 +40,19 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
 
         if (/*ctx?.WORD()?.size == 2 && */isBuiltInType) {
             if (!isCorrectType(tType, rhs)) {
-                errors.add(
-                    MyError(
-                        "Variable on right side of assignment to ${varName} is of incorrect type! (type ${
-                            getType(
-                                varName
-                            )
-                        }",
-                        ctx.start.line, ctx.start.charPositionInLine
-                    )
-                )
+//                errors.add(
+//                    MyError(
+//                        "Variable on right side of assignment to ${varName} is of incorrect type! (type ${
+//                            getType(
+//                                varName
+//                            )
+//                        })",
+//                        ctx.start.line, ctx.start.charPositionInLine
+//                    )
+//                )
             }
         } else if (/*ctx?.WORD()?.size == 2 && */!isBuiltInType) {
-            if (!isCorrectType(tType, ctx?.expression()?.literal()?.methodCall()?.WORD(0)?.text)) {
+            if (!isCorrectType(tType, ctx?.expression()?.literal()?.methodCall()?.methodCallParameter(0)?.text)) {
                 errors.add(
                     MyError(
                         "Variable on right side of assignment" +
@@ -64,15 +64,6 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
             }
         }
 
-//        else if (ctx?.WORD()?.size == 3)
-//        {
-//            if (!isCorrectType(tType, ctx?.WORD(2)?.text))
-//            {
-//                errors.add(MyError("Variable on right side of assignment" +
-//                        " to $varName is of incorrect type! (type ${getType(varName)})", ctx.start.line, ctx.start.charPositionInLine))
-//            }
-//        }
-
         if (!StringUtils.isBlank(ctx?.MEMORY_QUALIFIER()?.text)) {
             if (globalScope[varName] != null) {
                 if (ctx != null) { // TODO
@@ -81,7 +72,7 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
             }
         }
 
-        globalScope[varName] = Symbol(rhs!!, tType)
+        globalScope[varName] = Symbol(varName!!, tType)
 
         super.visitDeclaration(ctx)
     }

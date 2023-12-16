@@ -9,6 +9,7 @@ import symboltable.Symbol
 class ClassNode(
     parent: SyntaxTreeNode?,
     val classContext: kernelParser.ClassContext,
+    private val kernels: MutableList<MethodNode>?,
     private val parentClassNode: ClassNode?,
     private val globalScope: Scope,
     private val tabCounter: Int
@@ -42,7 +43,7 @@ class ClassNode(
                 ret += createHeaderIncludingParentProperties(method)
                 ret += MethodBodyNode(this,
                     parentClassNode!!.classContext.method()
-                        .filter { it.methodHeader().WORD().text == method.name }[0].methodBody(),
+                        .filter { it.methodHeader().WORD().text == method.name }[0].methodBody(), kernels,
                     tabCounter
                 ).toCode()
             }
@@ -52,7 +53,7 @@ class ClassNode(
 
         for (method in methods) {
             ret += createHeader(method)
-            ret += MethodBodyNode(this, method.methodBody(), tabCounter).toCode()
+            ret += MethodBodyNode(this, method.methodBody(), kernels, tabCounter).toCode()
         }
 
         return ret

@@ -1,14 +1,20 @@
 package typesystem
 
+import Errors
+import MyError
 import kernel.antlr.kernelParser
+import kernel.antlr.kernelParser.ExpressionContext
 import symboltable.Scope
 
 class ExpressionTypeChecker(
-    val typeSystem: TypeSystem
+    val typeSystem: TypeSystem,
+    val errors: Errors
 ) {
     private val typePrecedence = listOf(TSType("float2"), TSType("float"), TSType("int"))
-
-    fun getExpressionType(currentScope: Scope, expression: kernelParser.ExpressionContext): TSType {
+    private val builtInMethods = mapOf("get_global_id" to TSType("int"))
+    private lateinit var ctx: ExpressionContext
+    fun getExpressionType(currentScope: Scope, expression: ExpressionContext): TSType {
+        ctx = expression
         val types = mutableListOf<TSType>()
 
         if (expression.prefixOperator() != null) {
@@ -52,14 +58,15 @@ class ExpressionTypeChecker(
         val typeLeft = getType(currentScope, lhs)
         val resultType = determineResultType(listOf(typeRight, typeLeft))
 
-        if (typesAreCompatible(resultType, typeRight, typeLeft)) {
-            throw RuntimeException("The types on the 2 sides of the expression are not the same!")
+        if (!typesAreCompatible(resultType, typeRight, typeLeft)) {
+            errors.add(MyError("Types are not compatible! (${typeRight.type} and ${typeLeft.type})", ctx?.start?.line!!, ctx.start?.charPositionInLine!!))
+            print(errors.getErrors())
         }
 
         return resultType.type
     }
 
-    private fun typesAreCompatible(
+    fun typesAreCompatible(
         resultType: TSType,
         typeRight: TSType,
         typeLeft: TSType
@@ -97,6 +104,8 @@ class ExpressionTypeChecker(
             return typeSystem.types["int"]!!
         } else if (variable.toFloatOrNull() != null) {
             return typeSystem.types["float"]!!
+        }  else if (variable == "true" || variable == "false") {
+            return typeSystem.types["bool"]!!
         } else if (variable.startsWith("\"")
             && variable.endsWith("\"")
             && variable.filter { it == '"' }.length == 2
@@ -106,15 +115,24 @@ class ExpressionTypeChecker(
             return typeSystem.types["float2"]!!
         }
 
-        var currScope: Scope? = currentScope;
+        var currScope: Scope? = currentScope
+        val index = if (variable.indexOf("[") < 0) variable.length else variable.indexOf("[")
+        val scopeName = variable.substring(0, index)
         while (currScope != null) {
-            if (currScope.keys.contains(variable)) {
-                return currScope[variable]?.type!!
+            if (currScope.keys.contains(scopeName)) {
+                return currScope[scopeName]?.type!!
             }
             currScope = currScope.parent
         }
 
-        throw RuntimeException("No type defined for variable ${variable}!")
+        val index2 = if (variable.indexOf("(") < 0) variable.length else variable.indexOf("(")
+        val purelyName = variable.substring(0, index2)
+        if (builtInMethods.keys.contains(purelyName))
+            return builtInMethods[purelyName]!!
+
+        errors.add(MyError("No type defined for variable ${variable}!", ctx?.start?.line!!, ctx.start?.charPositionInLine!!))
+        print(errors.getErrors())
+        return typeSystem.types["ErrorType"]!!
     }
 
 }

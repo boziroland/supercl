@@ -163,36 +163,46 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
             var type = ctx?.typeName()?.text ?: ctx?.variable()?.text
             val varName = ctx?.variable()?.text
             var rhs: kernelParser.ExpressionContext? = ctx?.expression()
-            var rhsStr = ctx?.expression()?.text!!
-            var rhsType = getType(rhs!!).type
-            if (rhsType == typeSystem.types["ErrorType"]!!.type) {
-                rhsType = expressionTypeChecker.getExpressionType(currentScope, rhs).type
-            }
-            if (cast) {
-                if (expressionTypeChecker.isClass(rhsType)) {
-                    currentScope[varName!!] = Symbol(varName, TSType(rhsType))
-                } else {
-                    rhsStr = expressionTypeChecker.valueConverter(rhsStr, ctx?.cast()?.text!!, rhsType)
+            currentScope[varName!!] =
+                Symbol(varName, TSType(type!!, ctx.typeName()?.LEFTBRACKET() != null))
+            if (rhs != null) {
+                var rhsStr = ctx?.expression()?.text!!
+                var rhsType = getType(rhs!!).type
+                if (rhsType == typeSystem.types["ErrorType"]!!.type) {
+                    rhsType = expressionTypeChecker.getExpressionType(currentScope, rhs).type
+                } else
+                    expressionTypeChecker.getReturnType(currentScope, varName, rhs.text)
+                if (cast) {
+                    if (expressionTypeChecker.isClass(rhsType)) {
+                        currentScope[varName!!] =
+                            Symbol(varName, TSType(rhsType, ctx.typeName()?.LEFTBRACKET() != null))
+                    } else {
+                        rhsStr = expressionTypeChecker.valueConverter(rhsStr, ctx?.cast()?.text!!, rhsType)
+                    }
                 }
-            }
 
-            if (type == "var") {
-                type = getType(rhs!!).type
-            }
+                if (type == "var") {
+                    type = getType(rhs!!).type
+                }
 
-            if (ctx?.expression() != null) {
-                currentScope[rhsStr!!] = Symbol(rhsStr, TSType(type!!))
+                if (ctx?.expression() != null) {
+                    currentScope[rhsStr!!] = Symbol(rhsStr, TSType(type!!, ctx.typeName()?.LEFTBRACKET() != null))
+                }
+            } else {
+                currentScope[varName!!] =
+                    Symbol(varName, TSType(type!!, ctx.typeName()?.LEFTBRACKET() != null))
             }
 
             if (isBuiltInType) {
                 if (ctx?.expression()?.binaryOperator() != null) {
                     visitBinaryOperator(ctx.expression().binaryOperator())
                 }
-            } else if (/*ctx?.WORD()?.size == 2 && */!isBuiltInType) {
-                if (!isCorrectType(TSType(type!!), ctx?.expression()?.literal()?.methodCall()?.WORD(0)?.text!!)) {
+            } else if (!isBuiltInType) {
+                if (rhs != null
+                    && !isCorrectType(TSType(type), ctx.expression()?.literal()?.methodCall()?.WORD()?.text!!)) {
                     errors.add(
                         MyError(
-                            "Variable on right side of assignment to ${varName} is of incorrect type! (type ${
+                            "Variable on right side of declaration to ${varName} is of incorrect type! (type ${
                                 getTypeOfVariable(
                                     varName!!
                                 ).type
@@ -227,7 +237,7 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
                     }
                 }
             }
-            currentScope[varName!!] = Symbol(varName, TSType(type!!))
+            currentScope[varName!!] = Symbol(varName, TSType(type!!, ctx.typeName()?.LEFTBRACKET() != null))
         }
         super.visitDeclaration(ctx)
     }
@@ -272,8 +282,9 @@ class DetailedVisitor : kernelBaseVisitor<Any>() {
     }
 
     fun isCorrectType(lhs: TSType, rhs: String): Boolean {
-        return lhs.type == globalScope[rhs]?.type?.type ||
-                globalScope[rhs]?.type?.parents?.contains(lhs)!!
+        return lhs.type in typeSystem.types && rhs in typeSystem.types
+//        return lhs.type == globalScope[rhs]?.type?.type ||
+//                globalScope[rhs]?.type?.parents?.contains(lhs)!!
     }
 
     fun isCorrectType(lhs: TSType, rhs: TSType): Boolean {
