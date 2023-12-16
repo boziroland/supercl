@@ -40,16 +40,16 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
 
         if (/*ctx?.WORD()?.size == 2 && */isBuiltInType) {
             if (!isCorrectType(tType, rhs)) {
-//                errors.add(
-//                    MyError(
-//                        "Variable on right side of assignment to ${varName} is of incorrect type! (type ${
-//                            getType(
-//                                varName
-//                            )
-//                        })",
-//                        ctx.start.line, ctx.start.charPositionInLine
-//                    )
-//                )
+                errors.add(
+                    MyError(
+                        "Variable on right side of assignment to ${varName} is of incorrect type! (type ${
+                            getType(
+                                varName
+                            )
+                        })",
+                        ctx.start.line, ctx.start.charPositionInLine
+                    )
+                )
             }
         } else if (/*ctx?.WORD()?.size == 2 && */!isBuiltInType) {
             if (!isCorrectType(tType, ctx?.expression()?.literal()?.methodCall()?.methodCallParameter(0)?.text)) {
