@@ -81,7 +81,7 @@ expression
     ;
 
 literal
-    : TRUE | FALSE | WORD | REALNUMBER | STRING | variable | methodCall
+    : realNumberVec2D | realNumberVec3D | TRUE | FALSE | WORD | REALNUMBER | STRING | variable | methodCall
     ;
 
 prefixOperator
@@ -97,9 +97,9 @@ expressionWithReturnValue
     ;
 
 binaryOperator
-    : literal (STAR | MOD | DIV) (literal | binaryOperator)
-    | literal (PLUS | MINUS)  (literal | binaryOperator)
-    | literal (EQUAL | NOTEQUAL | LESS | LESSEQUAL | GREATER | GREATEREQUAL) (literal | binaryOperator)
+    : literal (STAR | MOD | DIV) (literal | binaryOperator | expression)
+    | literal (PLUS | MINUS)  (literal | binaryOperator | expression)
+    | literal (EQUAL | NOTEQUAL | LESS | LESSEQUAL | GREATER | GREATEREQUAL) (literal | binaryOperator | expression)
     ;
 
 specialAssign
@@ -107,7 +107,7 @@ specialAssign
     ;
 
 variable
-    : WORD ('.' (WORD | methodCall))* (LEFTBRACKET (REALNUMBER | WORD) RIGHTBRACKET)?
+    : WORD ('.' (WORD | methodCall))* (LEFTBRACKET (REALNUMBER | WORD) RIGHTBRACKET)? ('.' (WORD | methodCall))*
     ;
 
 typeName
@@ -120,11 +120,11 @@ cast
 
 
 realNumberVec2D
-    : LPARENT REALNUMBER COMMA REALNUMBER RPARENT
+    : LPARENT (REALNUMBER | expression) COMMA (REALNUMBER | expression) RPARENT
     ;
 
 realNumberVec3D
-    : LPARENT REALNUMBER COMMA REALNUMBER COMMA REALNUMBER RPARENT
+    : LPARENT (REALNUMBER | expression) COMMA (REALNUMBER | expression) COMMA (REALNUMBER | expression) RPARENT
     ;
 
 SINGLELINECOMMENT

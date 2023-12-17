@@ -1,75 +1,17 @@
-class MyVec2f{
-    float x
-    float y
-}
-
-class ParticleData{
-    float radius
-    float pressure
-    float density
-
-    MyVec2f velocity
-    MyVec2f pressureForce
-    MyVec2f viscosityForce
-    MyVec2f position
-
-    float mass
-    float effectRadius
-}
-
-__constant float PI = 3.14159265359
-__constant float background_pressure = 875.0
-__constant float default_fluid_density = 625.0
-__constant float viscosity = 300.0
-__constant float2 gravity = (0.0, 30.0)
-__constant float non_horizontal_bounce_constant = 0.95
-
-__constant float wallThicknessLeft = 36.0
-__constant float wallThicknessRight = 45.0
-__constant float floorHeight = 36.0
-
-__constant float dt = 0.0005
-
-float poly6_kernel(float2 vec, float h){
-    float dist_sq = vec.x * vec.x + vec.y * vec.y
-    float h_sq = h * h
-    if(h_sq < dist_sq || dist_sq < 0.0f){
-        return 0.0f
-    }else{
-        return 315.0f / (64.0f * PI * pow(h, 9.0f)) * pow(h_sq - dist_sq, 3.0f)
-    }
-}
-
-__kernel calculateDensity(__global ParticleData inputData, __global int size){
+__kernel square(__global float inputData, __global float outputData){
     int id = get_global_id(0)
-    ParticleData pi = inputData[id]
-    float dens = 0.0f
-    for(int i = 0; i < (*size); i++){
-
-        ParticleData pj = inputData[i]
-        float2 distanceVector = (float2)(pi.position.x - pj.position.x, pi.position.y - pj.position.y)
-        float distance = fast_length(distanceVector)
-
-        if(distance < pi.effectRadius){
-            float mass = pj.mass
-            float kernel_val = poly6_kernel(distanceVector, pi.effectRadius)
-            float currDens = mass * kernel_val
-            dens += currDens
-        }
-    }
-    float currPress = background_pressure * (dens - default_fluid_density)
-
-    inputData[id].density = dens
-    inputData[id].pressure = currPress
+    outputData = inputData[id] * inputData[id]
 }
 
 void openCL(){
-    int[5] myData
+    int[5] myData(1, 2, 3, 4, 5)
     int[5] myResult
 
-    initOpenCL()
+    initOpenCL("GPU")
     addKernels(square)
-    bindDataToKernel(square, 5, 0)
+    bindDataToKernel(square, 5, 0, "R")
     addDataToKernel(myData)
     runKernel(square, myResult, 5)
 }
+
+openCL()

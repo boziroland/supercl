@@ -23,7 +23,6 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
 
     override fun visitProgram(ctx: kernelParser.ProgramContext?) {
         globalScope["print"] = MethodSymbol("void", "print", TSType("void"))
-        globalScope["initOpenCL"] = MethodSymbol("void", "initOpenCL", TSType("void"))
         super.visitProgram(ctx)
 
         print(errors.getErrors())
@@ -46,23 +45,32 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
                             getType(
                                 varName
                             )
-                        })",
+                        }",
                         ctx.start.line, ctx.start.charPositionInLine
                     )
                 )
             }
         } else if (/*ctx?.WORD()?.size == 2 && */!isBuiltInType) {
-            if (!isCorrectType(tType, ctx?.expression()?.literal()?.methodCall()?.methodCallParameter(0)?.text)) {
-                errors.add(
-                    MyError(
-                        "Variable on right side of assignment" +
-                                " to $varName is of incorrect type! (type ${getType(varName)})",
-                        ctx.start.line,
-                        ctx.start.charPositionInLine
-                    )
-                )
-            }
+//            if (!isCorrectType(tType, ctx?.expression()?.literal()?.methodCall()?.WORD()?.text)) {
+//                errors.add(
+//                    MyError(
+//                        "Variable on right side of assignment" +
+//                                " to $varName is of incorrect type! (type ${getType(varName)})",
+//                        ctx.start.line,
+//                        ctx.start.charPositionInLine
+//                    )
+//                )
+//            }
         }
+
+//        else if (ctx?.WORD()?.size == 3)
+//        {
+//            if (!isCorrectType(tType, ctx?.WORD(2)?.text))
+//            {
+//                errors.add(MyError("Variable on right side of assignment" +
+//                        " to $varName is of incorrect type! (type ${getType(varName)})", ctx.start.line, ctx.start.charPositionInLine))
+//            }
+//        }
 
         if (!StringUtils.isBlank(ctx?.MEMORY_QUALIFIER()?.text)) {
             if (globalScope[varName] != null) {
@@ -72,7 +80,7 @@ class GlobalVisitor : kernelBaseVisitor<Any>() {
             }
         }
 
-        globalScope[varName] = Symbol(varName!!, tType)
+        globalScope[varName] = Symbol(rhs!!, tType)
 
         super.visitDeclaration(ctx)
     }
